@@ -1,0 +1,94 @@
+
+import React from 'react';
+import { GameState } from '../types';
+
+interface DashboardProps {
+  onStartQuest: (questId: number) => void;
+  questStates: { solved: boolean }[];
+}
+
+const LogoSVG = () => (
+  <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0.478174" y="0.47793" width="18.8062" height="16.2562" fill="#0038DF"/>
+    <rect x="0.478174" y="0.47793" width="18.8062" height="16.2562" stroke="black" stroke-width="0.95625"/>
+    <path d="M0.956299 16.2563V8.48196H5.19189L8.21732 3.50635L11.8478 13.4576L14.8732 8.79293H18.8063V16.2563H0.956299Z" fill="white"/>
+    <path d="M9.88135 8.60635L7.96885 3.50635L4.78135 8.60635H1.59385" stroke="black" stroke-width="1.275" stroke-linecap="square"/>
+    <path d="M9.88135 8.60605L11.7938 13.7061L14.9813 8.60605H18.1688" stroke="black" stroke-width="1.275" stroke-linecap="square"/>
+  </svg>
+);
+
+const Dashboard: React.FC<DashboardProps> = ({ onStartQuest, questStates }) => {
+  return (
+    <div className="relative w-[402px] h-[874px] bg-white rounded-[40px] shadow-2xl overflow-hidden pointer-events-auto border-[8px] border-black scale-90 md:scale-100">
+      {/* Header */}
+      <div className="absolute left-[149px] top-[47px] flex items-center gap-[5.25px]">
+        <LogoSVG />
+        <span className="text-[#444444] font-medium text-[18px] leading-[23px] tracking-[-0.04em] font-['DM Sans']">
+          buildPCBs
+        </span>
+      </div>
+
+      {/* Title */}
+      <div className="absolute left-[16px] top-[123px] w-[356px] text-[#888888] font-extrabold text-[22px] leading-[120%] tracking-[0.01em]">
+        Solve one of the scenes to earn.
+      </div>
+
+      {/* Grid */}
+      <div className="absolute inset-0 pt-[179px] px-[16px]">
+        <div className="grid grid-cols-2 gap-[10px]">
+          {/* Tile 1: Juice Box */}
+          <div 
+            onClick={() => onStartQuest(0)}
+            className={`w-[180px] h-[256px] rounded-[12px] border-[0.3px] border-[#AEAEAE] overflow-hidden relative group cursor-pointer ${questStates[0].solved ? 'bg-blue-50' : 'bg-[#EDEDED]'}`}
+          >
+            {questStates[0].solved ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+                <div className="text-4xl mb-2">⚡</div>
+                <div className="text-[10px] font-black text-[#0038DF] uppercase tracking-tighter">Juice Box Solved</div>
+                <div className="mt-2 text-[8px] text-stone-500 font-mono">Status: Charging</div>
+              </div>
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 opacity-60">
+                <div className="text-4xl mb-2">☕</div>
+                <div className="text-[10px] font-bold text-stone-600 uppercase">Cafe Chronicles</div>
+              </div>
+            )}
+            <div className="absolute bottom-2 left-2 flex gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+            </div>
+          </div>
+
+          {/* Tile 2: Locked */}
+          <div className="w-[180px] h-[256px] bg-[#EDEDED] border-[0.3px] border-[#AEAEAE] rounded-[12px] opacity-40 flex items-center justify-center">
+            <span className="text-2xl">🔒</span>
+          </div>
+          
+          {/* Tile 3: Locked */}
+          <div className="w-[180px] h-[256px] bg-[#EDEDED] border-[0.3px] border-[#AEAEAE] rounded-[12px] mt-[9px] opacity-40 flex items-center justify-center">
+             <span className="text-2xl">🔒</span>
+          </div>
+
+          {/* Tile 4: Locked */}
+          <div className="w-[180px] h-[256px] bg-[#EDEDED] border-[0.3px] border-[#AEAEAE] rounded-[12px] mt-[9px] opacity-40 flex items-center justify-center">
+             <span className="text-2xl">🔒</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Start Button Group */}
+      <div className="absolute left-[64px] top-[762px] w-[274px] h-[75px]">
+        <div className="absolute w-[274px] h-[75px] bg-[#0038DF] border border-black rounded-[99px]"></div>
+        <button 
+          onClick={() => onStartQuest(0)}
+          className="absolute w-[274px] h-[65px] border border-black rounded-[99px] flex items-center justify-center active:scale-95 transition-transform"
+          style={{ background: 'linear-gradient(180deg, #0038DF 20.77%, #6C90FF 112.31%)' }}
+        >
+          <span className="text-white font-black text-[22px] font-['Google Sans Flex']">Start</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
