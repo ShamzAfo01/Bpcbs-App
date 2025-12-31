@@ -301,64 +301,65 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
       }
     });
 
-    mountRef.current?.removeChild(renderer.domElement);
-  };
-}, [activeQuestId]); // Re-run setup when activeQuestId changes
+    return () => {
+      mountRef.current?.removeChild(renderer.domElement);
+    };
+  }, [activeQuestId]);
 
-useEffect(() => {
-  if (gameState === GameState.CHARGING && splitterRef.current && questMarkRef.current) {
-    splitterRef.current.visible = true;
-    questMarkRef.current.visible = false;
-    // Detailed transition
-    gsap.from(splitterRef.current.scale, { x: 0, y: 0, z: 0, duration: 1, ease: "elastic.out(1, 0.5)" });
-  } else if (gameState === GameState.CHARGING && activeQuestId === 1 && questMarkRef.current) {
-    // Quest 2 Specific Success Animation
-    questMarkRef.current.visible = false;
+  useEffect(() => {
+    if (gameState === GameState.CHARGING && splitterRef.current && questMarkRef.current) {
+      splitterRef.current.visible = true;
+      questMarkRef.current.visible = false;
+      // Detailed transition
+      gsap.from(splitterRef.current.scale, { x: 0, y: 0, z: 0, duration: 1, ease: "elastic.out(1, 0.5)" });
+    } else if (gameState === GameState.CHARGING && activeQuestId === 1 && questMarkRef.current) {
+      // Quest 2 Specific Success Animation
+      questMarkRef.current.visible = false;
 
-    // Find Monstera Leaves and animate them up
-    if (sceneRef.current) {
-      const monsteraGroup = sceneRef.current.getObjectByName('monstera_group');
-      if (monsteraGroup) {
-        monsteraGroup.children.forEach((child) => {
-          // Check if it's a leaf (based on simple logic or naming)
-          if (child.userData.type === 'leaf') {
-            gsap.to(child.rotation, { x: -Math.PI / 4, duration: 2.0, ease: "power2.out" }); // Straighten up
-            gsap.to((child as THREE.Mesh).material, {
-              // @ts-ignore - simulating color change/texture update if possible or just tint
-              color: new THREE.Color(0x228B22),
-              duration: 2.0
-            });
-          }
-        });
+      // Find Monstera Leaves and animate them up
+      if (sceneRef.current) {
+        const monsteraGroup = sceneRef.current.getObjectByName('monstera_group');
+        if (monsteraGroup) {
+          monsteraGroup.children.forEach((child) => {
+            // Check if it's a leaf (based on simple logic or naming)
+            if (child.userData.type === 'leaf') {
+              gsap.to(child.rotation, { x: -Math.PI / 4, duration: 2.0, ease: "power2.out" }); // Straighten up
+              gsap.to((child as THREE.Mesh).material, {
+                // @ts-ignore - simulating color change/texture update if possible or just tint
+                color: new THREE.Color(0x228B22),
+                duration: 2.0
+              });
+            }
+          });
+        }
+
+        // Show PCB in Soil
+        const pcb = sceneRef.current.getObjectByName('moisture_pcb');
+        if (pcb) {
+          pcb.visible = true;
+          gsap.from(pcb.scale, { x: 0, y: 0, z: 0, duration: 1, ease: 'back.out(1.7)' });
+        }
       }
 
-      // Show PCB in Soil
-      const pcb = sceneRef.current.getObjectByName('moisture_pcb');
-      if (pcb) {
-        pcb.visible = true;
-        gsap.from(pcb.scale, { x: 0, y: 0, z: 0, duration: 1, ease: 'back.out(1.7)' });
-      }
+    } else if (gameState === GameState.DASHBOARD && splitterRef.current && questMarkRef.current) {
+      splitterRef.current.visible = false;
+      questMarkRef.current.visible = true;
     }
+  }, [gameState]);
 
-  } else if (gameState === GameState.DASHBOARD && splitterRef.current && questMarkRef.current) {
-    splitterRef.current.visible = false;
-    questMarkRef.current.visible = true;
-  }
-}, [gameState]);
+  useEffect(() => {
+    if (gameState === GameState.ZOOMING && cameraRef.current) {
+      gsap.to(cameraRef.current.position, {
+        x: -0.3, y: 0.9, z: 0.2,
+        duration: 0.8,
+        ease: "power2.inOut"
+      });
+    } else if (gameState === GameState.DASHBOARD && cameraRef.current) {
+      gsap.to(cameraRef.current.position, { x: 0, y: 1.2, z: 0.8, duration: 1 });
+    }
+  }, [gameState]);
 
-useEffect(() => {
-  if (gameState === GameState.ZOOMING && cameraRef.current) {
-    gsap.to(cameraRef.current.position, {
-      x: -0.3, y: 0.9, z: 0.2,
-      duration: 0.8,
-      ease: "power2.inOut"
-    });
-  } else if (gameState === GameState.DASHBOARD && cameraRef.current) {
-    gsap.to(cameraRef.current.position, { x: 0, y: 1.2, z: 0.8, duration: 1 });
-  }
-}, [gameState]);
-
-return <div ref={mountRef} className="absolute inset-0 z-0 bg-[#020205]" />;
+  return <div ref={mountRef} className="absolute inset-0 z-0 bg-[#020205]" />;
 };
 
 export default ThreeScene;
