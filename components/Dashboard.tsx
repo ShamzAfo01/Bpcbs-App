@@ -39,18 +39,24 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartQuest, questStates }) => {
           {/* Tile 1: Juice Box */}
           <div
             onClick={() => onStartQuest(0)}
-            className={`w-[180px] h-[256px] rounded-[12px] border-[0.3px] border-[#AEAEAE] overflow-hidden relative group cursor-pointer ${questStates[0].solved ? 'bg-blue-50' : 'bg-[#EDEDED]'}`}
+            className={`relative rounded-3xl p-6 cursor-pointer transition-all hover:scale-105 active:scale-95 overflow-hidden duration-300 shadow-md border-2 border-transparent hover:border-blue-300 group ${questStates[0].solved ? 'bg-blue-50' : 'bg-[#F0F4F8]'}`}
           >
+            {/* Playlet: Subtle tech pulse */}
+            <div className="absolute inset-0 pointer-events-none opacity-10">
+              <div className="absolute inset-0 bg-blue-400 animate-pulse"></div>
+            </div>
+
             {questStates[0].solved ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+              <div className="relative z-10 flex flex-col items-center justify-center h-full">
                 <div className="text-4xl mb-2">⚡</div>
                 <div className="text-[10px] font-black text-[#0038DF] uppercase tracking-tighter">Juice Box Solved</div>
                 <div className="mt-2 text-[8px] text-stone-500 font-mono">Status: Charging</div>
               </div>
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 opacity-60">
-                <div className="text-4xl mb-2">☕</div>
-                <div className="text-[10px] font-bold text-stone-600 uppercase">Cafe Chronicles</div>
+              <div className="relative z-10 flex flex-col items-center justify-center h-full">
+                <div className="text-4xl mb-2 transition-transform duration-700 group-hover:scale-110">☕</div>
+                <div className="text-[10px] font-bold text-stone-600 uppercase tracking-widest">Cafe Chronicles</div>
+                <div className="mt-2 text-[8px] text-stone-400">Preview: Power Management</div>
               </div>
             )}
             <div className="absolute bottom-2 left-2 flex gap-1">
@@ -62,18 +68,28 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartQuest, questStates }) => {
           {/* Tile 2: The Thirsty Monstera */}
           <div
             onClick={() => onStartQuest(1)}
-            className={`w-[180px] h-[256px] rounded-[12px] border-[0.3px] border-[#AEAEAE] overflow-hidden relative group cursor-pointer ${questStates[1].solved ? 'bg-green-50' : 'bg-[#EDEDED]'}`}
+            className={`relative rounded-3xl p-6 cursor-pointer transition-all hover:scale-105 active:scale-95 overflow-hidden duration-300 shadow-md border-2 border-transparent hover:border-green-300 group ${questStates[1].solved ? 'bg-green-50' : 'bg-[#FDFBE6]'}`}
           >
+            {/* Playlet Background Animation for Tile 2 */}
+            {!questStates[1].solved && (
+              <div className="absolute inset-0 pointer-events-none opacity-20">
+                {/* Simulating a plant swaying or rising */}
+                <div className="absolute bottom-[-20%] left-[20%] w-[60%] h-[80%] bg-green-900 rounded-t-full animate-pulse blur-xl"></div>
+                <div className="absolute top-[30%] left-[30%] text-[80px] animate-bounce duration-[3000ms] opacity-50">🍂</div>
+              </div>
+            )}
+
             {questStates[1].solved ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+              <div className="relative z-10 flex flex-col items-center justify-center h-full">
                 <div className="text-4xl mb-2">🌿</div>
                 <div className="text-[10px] font-black text-green-600 uppercase tracking-tighter">Monstera Saved</div>
                 <div className="mt-2 text-[8px] text-stone-500 font-mono">Status: Thriving</div>
               </div>
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 opacity-70">
-                <div className="text-4xl mb-2">🍂</div>
-                <div className="text-[10px] font-bold text-stone-600 uppercase">The Thirsty Monstera</div>
+              <div className="relative z-10 flex flex-col items-center justify-center h-full">
+                <div className="text-4xl mb-2 transition-transform duration-1000 group-hover:rotate-12">🍂</div>
+                <div className="text-[10px] font-bold text-stone-600 uppercase tracking-widest">The Thirsty Monstera</div>
+                <div className="mt-2 text-[8px] text-stone-400">Preview: Biological Asset Recovery</div>
               </div>
             )}
             <div className="absolute bottom-2 left-2 flex gap-1">
