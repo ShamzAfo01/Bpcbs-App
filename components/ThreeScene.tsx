@@ -579,108 +579,177 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
     };
   }, [activeQuestId]);
 
-  useEffect(() => {
-    if (gameState === GameState.CHARGING && splitterRef.current && questMarkRef.current) {
-      if (activeQuestId === 0) {
-        splitterRef.current.visible = true;
-        questMarkRef.current.visible = false;
-        gsap.from(splitterRef.current.scale, { x: 0, y: 0, z: 0, duration: 1, ease: "elastic.out(1, 0.5)" });
-      } else if (activeQuestId === 1) {
-        // Quest 2 Specific Success Animation
-        questMarkRef.current.visible = false;
+} else if (gameState === GameState.REVEALING && sceneRef.current) {
+  // === REVEAL & INSTALL ANIMATION SEQUENCE ===
 
-        if (sceneRef.current) {
-          const monsteraGroup = sceneRef.current.getObjectByName('monstera_group');
-          if (monsteraGroup) {
-            monsteraGroup.children.forEach((child) => {
-              if (child.userData.type === 'leaf') {
-                gsap.to(child.rotation, { x: -Math.PI / 4, duration: 2.0, ease: "power2.out" });
-                gsap.to((child as THREE.Mesh).material, {
-                  color: new THREE.Color(0x228B22),
-                  duration: 2.0
-                });
-              }
+  const onInstallComplete = () => {
+    setGameState(GameState.CHARGING);
+    setQuestStates(prev => {
+      const newStates = [...prev];
+      newStates[activeQuestId] = { solved: true };
+      return newStates;
+    });
+  };
+
+  if (activeQuestId === 0) {
+    // Quest 1: Splitter
+    const splitter = splitterRef.current;
+    if (splitter) {
+      splitter.visible = true;
+      // Reveal Position: Center screen, slight tilt
+      // We need to project "Center Screen" to World Coordinates at a readable depth
+      const vec = new THREE.Vector3(0, 0, 0.5); // Center, depth 0.5
+      vec.unproject(cameraRef.current!);
+      vec.sub(cameraRef.current!.position).normalize();
+      var distance = 2; // Arbitrary distance in front of camera
+      var pos = cameraRef.current!.position.clone().add(vec.multiplyScalar(distance));
+
+      // Hardcode for simpler control relative to camera
+      // Actually, let's just place it relative to the laptop for the animation start
+      splitter.position.set(0, 1.2, 0.5);
+      splitter.scale.set(0, 0, 0);
+
+      // Step 1: Reveal (Pop in and Rotate)
+      const tl = gsap.timeline({ onComplete: onInstallComplete });
+      tl.to(splitter.scale, { x: 1, y: 1, z: 1, duration: 1, ease: "elastic.out(1, 0.5)" })
+        .to(splitter.rotation, { y: Math.PI * 2, duration: 2, ease: "power1.inOut" }, "<")
+        // Step 2: Install (Move to final socket position)
+        .to(splitter.position, { x: -0.5, y: 0.96, z: -0.28, duration: 1.5, ease: "power2.inOut" }, ">0.5")
+        .to(splitter.rotation, { x: 0, y: 0, z: 0, duration: 1.5 }, "<");
+    }
+  } else if (activeQuestId === 1) {
+    // Quest 2: Moisture PCB
+    const pcb = sceneRef.current.getObjectByName('moisture_pcb');
+    if (pcb) {
+      pcb.visible = true;
+      pcb.position.set(0, 0.5, 0.5); // Float above plant
+      pcb.scale.set(0, 0, 0);
+
+      const tl = gsap.timeline({ onComplete: onInstallComplete });
+      tl.to(pcb.scale, { x: 1, y: 1, z: 1, duration: 1, ease: "back.out(1.7)" })
+        .to(pcb.rotation, { y: Math.PI * 4, duration: 2.5, ease: "power2.out" }, "<")
+        // Install into soil
+        .to(pcb.position, { x: 0.2, y: 0.05, z: 0.2, duration: 1.5, ease: "power2.inOut" }, ">0.5")
+        .to(pcb.rotation, { x: -Math.PI / 6, y: 0, z: 0, duration: 1.5 }, "<");
+    }
+  } else if (activeQuestId === 2) {
+    // Quest 3: LED Strip
+    const ledStrip = sceneRef.current.getObjectByName('led_strip');
+    if (ledStrip) {
+      ledStrip.visible = true;
+      ledStrip.position.set(0, 0.2, 0.3); // Float above screen
+      ledStrip.scale.set(0, 0, 0);
+
+      const tl = gsap.timeline({ onComplete: onInstallComplete });
+      tl.to(ledStrip.scale, { x: 1, y: 1, z: 1, duration: 1, ease: "back.out(1.7)" })
+        .to(ledStrip.rotation, { z: Math.PI * 2, duration: 2, ease: "power2.inOut" }, "<")
+        // Install under screen
+        .to(ledStrip.position, { x: 0, y: 0.02, z: -0.05, duration: 1.5, ease: "power2.inOut" }, ">0.5")
+        .to(ledStrip.rotation, { x: 0, y: 0, z: 0, duration: 1.5 }, "<");
+    }
+  } else if (activeQuestId === 3) {
+    // Quest 4: PIR Sensor Node (Using the ring as proxy or we can create a quick Box for the sensor if needed, 
+    // but for now let's just imply it and maybe pulse the ring to show it "activating")
+    // Correction: Let's create a temporary sensor object if we can, or just animate the Ring scaling up from center
+
+    // Let's create a small "Sensor" box on the fly? No, safer to use existing or just animate logic.
+    // We will animate the Motion Ring "Deploying" from the cabinet to the floor.
+    const ring = sceneRef.current.getObjectByName('motion_ring');
+    if (ring) {
+      ring.visible = true;
+      ring.position.set(0, 1.3, -0.5); // Start at cabinet height
+      ring.scale.set(0.1, 0.1, 0.1);
+      (ring as THREE.Mesh).material.opacity = 0.8;
+
+      const tl = gsap.timeline({ onComplete: onInstallComplete });
+      tl.to(ring.scale, { x: 0.3, y: 0.3, z: 0.3, duration: 1, ease: "back.out" })
+        // Project down to floor
+        .to(ring.position, { x: 0, y: 0.01, z: 1.2, duration: 1.5, ease: "bounce.out" }, ">0.5")
+        .to(ring.scale, { x: 1, y: 1, z: 1, duration: 1.5 }, "<");
+    }
+  }
+
+} else if (gameState === GameState.CHARGING && splitterRef.current && questMarkRef.current) {
+  // Keep existing success animations essentially as "Result" animations logic
+  // But we handled the movement in REVEALING, so here we just handle the "Effects" (Lights on, Color Change etc)
+
+  if (activeQuestId === 0) {
+    questMarkRef.current.visible = false;
+    // Splitter is already in place
+  } else if (activeQuestId === 1) {
+    // Quest 2 Specific Success Effects (Plant/Soil)
+    questMarkRef.current.visible = false;
+    if (sceneRef.current) {
+      const monsteraGroup = sceneRef.current.getObjectByName('monstera_group');
+      if (monsteraGroup) {
+        monsteraGroup.children.forEach((child) => {
+          if (child.userData.type === 'leaf') {
+            gsap.to(child.rotation, { x: -Math.PI / 4, duration: 2.0, ease: "power2.out" });
+            gsap.to((child as THREE.Mesh).material, {
+              color: new THREE.Color(0x228B22),
+              duration: 2.0
             });
           }
-
-          // Restore Soil
-          const soil = sceneRef.current.getObjectByName('soil_surface') as THREE.Mesh;
-          if (soil) {
-            gsap.to((soil.material as THREE.MeshStandardMaterial).color, { r: 0.2, g: 0.1, b: 0.05, duration: 2.0 });
-          }
-
-          // Show PCB
-          const pcb = sceneRef.current.getObjectByName('moisture_pcb');
-          if (pcb) {
-            pcb.visible = true;
-            gsap.from(pcb.scale, { x: 0, y: 0, z: 0, duration: 1, ease: 'back.out(1.7)' });
-          }
-        }
-      } else if (activeQuestId === 2) {
-        // Quest 3 Specific Success Animation
-        questMarkRef.current.visible = false;
-
-        // Slide in LED Strip
-        const ledStrip = sceneRef.current?.getObjectByName('led_strip');
-        if (ledStrip) {
-          ledStrip.visible = true;
-          // Animate sliding under the screen (z: 0.2 -> -0.05)
-          gsap.to(ledStrip.position, { z: -0.05, duration: 1.5, ease: "power2.inOut" });
-        }
-
-        // Light up the Screen
-        const screen = sceneRef.current?.getObjectByName('retro_screen') as THREE.Mesh;
-        if (screen) {
-          gsap.to((screen.material as THREE.MeshStandardMaterial), {
-            emissive: 0x2A321B,
-            emissiveIntensity: 2,
-            duration: 0.5,
-            delay: 1.2 // Wait for strip to slide in
-          });
-          // Optional: Change color to clearer green
-          gsap.to((screen.material as THREE.MeshStandardMaterial).color, {
-            r: 0.5, g: 0.7, b: 0.1,
-            duration: 0.5,
-            delay: 1.2
-          });
-        }
-      } else if (activeQuestId === 3) {
-        // Quest 4 Success: Turn on Lights
-        const lights = sceneRef.current?.getObjectByName('cabinet_lights');
-        if (lights) {
-          lights.children.forEach(child => {
-            if (child instanceof THREE.SpotLight) {
-              gsap.to(child, { intensity: 10, duration: 1.5, ease: "power2.out" });
-            }
-          });
-        }
-        // Pulse the ring
-        const ring = sceneRef.current?.getObjectByName('motion_ring');
-        if (ring) {
-          gsap.to((ring as THREE.Mesh).material, { opacity: 0.8, duration: 0.5, yoyo: true, repeat: 3 });
-        }
-        if (questMarkRef.current) questMarkRef.current.visible = false;
+        });
       }
-
-    } else if (gameState === GameState.DASHBOARD && splitterRef.current && questMarkRef.current) {
-      splitterRef.current.visible = false;
-      questMarkRef.current.visible = true;
+      // Restore Soil
+      const soil = sceneRef.current.getObjectByName('soil_surface') as THREE.Mesh;
+      if (soil) {
+        gsap.to((soil.material as THREE.MeshStandardMaterial).color, { r: 0.2, g: 0.1, b: 0.05, duration: 2.0 });
+      }
     }
+  } else if (activeQuestId === 2) {
+    // Quest 3 Specific Success Effects (Screen Light Up)
+    questMarkRef.current.visible = false;
+    const screen = sceneRef.current?.getObjectByName('retro_screen') as THREE.Mesh;
+    if (screen) {
+      gsap.to((screen.material as THREE.MeshStandardMaterial), {
+        emissive: 0x2A321B,
+        emissiveIntensity: 2,
+        duration: 0.5,
+      });
+      gsap.to((screen.material as THREE.MeshStandardMaterial).color, {
+        r: 0.5, g: 0.7, b: 0.1,
+        duration: 0.5,
+      });
+    }
+  } else if (activeQuestId === 3) {
+    // Quest 4 Success Effects (Lights On)
+    if (questMarkRef.current) questMarkRef.current.visible = false;
+    const lights = sceneRef.current?.getObjectByName('cabinet_lights');
+    if (lights) {
+      lights.children.forEach(child => {
+        if (child instanceof THREE.SpotLight) {
+          gsap.to(child, { intensity: 10, duration: 1.5, ease: "power2.out" });
+        }
+      });
+    }
+    // Pulse the ring
+    const ring = sceneRef.current?.getObjectByName('motion_ring');
+    if (ring) {
+      gsap.to((ring as THREE.Mesh).material, { opacity: 0.4, duration: 0.5, yoyo: true, repeat: 3 });
+    }
+  }
+
+} else if (gameState === GameState.DASHBOARD && splitterRef.current && questMarkRef.current) {
+  splitterRef.current.visible = false;
+  questMarkRef.current.visible = true;
+}
   }, [gameState, activeQuestId]);
 
-  useEffect(() => {
-    if (gameState === GameState.ZOOMING && cameraRef.current) {
-      gsap.to(cameraRef.current.position, {
-        x: -0.3, y: 0.9, z: 0.2,
-        duration: 0.8,
-        ease: "power2.inOut"
-      });
-    } else if (gameState === GameState.DASHBOARD && cameraRef.current) {
-      gsap.to(cameraRef.current.position, { x: 0, y: 1.2, z: 0.8, duration: 1 });
-    }
-  }, [gameState]);
+useEffect(() => {
+  if (gameState === GameState.ZOOMING && cameraRef.current) {
+    gsap.to(cameraRef.current.position, {
+      x: -0.3, y: 0.9, z: 0.2,
+      duration: 0.8,
+      ease: "power2.inOut"
+    });
+  } else if (gameState === GameState.DASHBOARD && cameraRef.current) {
+    gsap.to(cameraRef.current.position, { x: 0, y: 1.2, z: 0.8, duration: 1 });
+  }
+}, [gameState]);
 
-  return <div ref={mountRef} className="absolute inset-0 z-0 bg-[#020205]" />;
+return <div ref={mountRef} className="absolute inset-0 z-0 bg-[#020205]" />;
 };
 
 export default ThreeScene;
