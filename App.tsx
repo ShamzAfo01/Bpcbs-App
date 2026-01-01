@@ -80,66 +80,40 @@ const App: React.FC = () => {
           </>
         )}
 
-        {/* State: Builder Interface */}
-        {gameState === GameState.BUILDING && activeQuestId === 0 && (
-          <div className="pointer-events-auto animate-in zoom-in-105 duration-500">
-            <SplitterBuilder onComplete={() => {
-              setGameState(GameState.CHARGING);
-              setQuestStates(prev => {
-                const newStates = [...prev];
-                newStates[0].solved = true;
-                return newStates;
-              });
-            }} />
+        {/* State: Agent Building (Shimmer UI) */}
+        {gameState === GameState.BUILDING && (
+          <div className="pointer-events-auto absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 animate-in fade-in duration-500">
+            <div className="relative w-[500px] h-[300px] bg-black/80 border border-white/10 rounded-xl overflow-hidden shadow-2xl flex flex-col p-8">
+              {/* Shimmer Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer"></div>
+
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                <div className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></div>
+                <div className="text-cyan-400 font-mono text-sm tracking-[0.2em] font-bold">AGENT_RUNTIME_ACTIVE</div>
+              </div>
+
+              {/* Terminal Logs */}
+              <div className="flex-1 font-mono text-xs text-stone-300 space-y-3 leading-relaxed">
+                <TypewriterLog activeQuestId={activeQuestId} onComplete={() => setGameState(GameState.REVEALING)} />
+              </div>
+
+              {/* Progress Bar */}
+              <div className="h-1 w-full bg-stone-800 rounded-full mt-4 overflow-hidden">
+                <div className="h-full bg-cyan-500 animate-progres-fill"></div>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Quest 2 Automatic Solve */}
-        {gameState === GameState.BUILDING && activeQuestId === 1 && (
-          <div className="pointer-events-auto flex items-center justify-center animate-in zoom-in-105 duration-500">
-            <div className="text-cyan-400 font-mono text-xl animate-pulse">DEPLOYING MOISTURE SENSORS...</div>
-            {setTimeout(() => {
-              setGameState(GameState.CHARGING);
-              setQuestStates(prev => {
-                const newStates = [...prev];
-                newStates[1].solved = true;
-                return newStates;
-              });
-            }, 2000) && null}
+        {gameState === GameState.REVEALING && (
+          // Hidden state primarily for ThreeScene to handle animations, but we can show a subtle "Installing..." UI
+          <div className="absolute bottom-10 left-10 text-cyan-500 font-mono text-xs animate-pulse tracking-[0.2em]">
+            INSTALLING_HARDWARE...
           </div>
         )}
 
-        {/* Quest 3 Automatic Solve: Backlight Repair */}
-        {gameState === GameState.BUILDING && activeQuestId === 2 && (
-          <div className="pointer-events-auto flex items-center justify-center animate-in zoom-in-105 duration-500">
-            <div className="text-green-400 font-mono text-xl animate-pulse font-bold tracking-widest">INSTALLING BACKLIGHT CIRCUIT...</div>
-            {setTimeout(() => {
-              setGameState(GameState.CHARGING);
-              setQuestStates(prev => {
-                const newStates = [...prev];
-                newStates[2] = { solved: true };
-                return newStates;
-              });
-            }, 2000) && null}
-          </div>
-        )}
-
-        {/* Quest 4 Automatic Solve: PIR Sensor */}
-        {gameState === GameState.BUILDING && activeQuestId === 3 && (
-          <div className="pointer-events-auto flex items-center justify-center animate-in zoom-in-105 duration-500">
-            <div className="text-yellow-400 font-mono text-xl animate-pulse font-bold tracking-widest">COMPILING PIR SENSOR NODE...</div>
-            {setTimeout(() => {
-              setGameState(GameState.CHARGING);
-              setQuestStates(prev => {
-                const newStates = [...prev];
-                newStates[3] = { solved: true };
-                return newStates;
-              });
-            }, 2000) && null}
-          </div>
-        )}
-
-        {/* State: Solved / manifest */}
+        {/* State: Solved / manifest (CHARGING) */}
         {gameState === GameState.CHARGING && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             {activeQuestId === 0 && activeSplitterPart && currentPart && (
@@ -294,8 +268,72 @@ const App: React.FC = () => {
       <style>{`
         @keyframes solve-pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
         .animate-solve-pulse { animation: solve-pulse 1.2s ease-in-out infinite; }
+        
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        .animate-shimmer { animation: shimmer 2s infinite; }
+        
+        @keyframes progress-fill { 0% { width: 0%; } 100% { width: 100%; } }
+        .animate-progres-fill { animation: progress-fill 3s linear forwards; }
       `}</style>
     </div>
+  );
+};
+
+// Sub-component for Typewriter Logs
+const TypewriterLog: React.FC<{ activeQuestId: number, onComplete: () => void }> = ({ activeQuestId, onComplete }) => {
+  const [lines, setLines] = useState<string[]>([]);
+
+  useEffect(() => {
+    const prompts = [
+      [ // Quest 1
+        "> ANALYZING_POWER_TOPOLOGY...",
+        "> DETECTED: SOCKET_CONTENTION",
+        "> GENERATING_SOLUTION: PASS_THROUGH_SPLITTER_V2",
+        "> COMPILING_HARDWARE_NODE..."
+      ],
+      [ // Quest 2
+        "> SCANNING_SOIL_CONDUCTIVITY...",
+        "> MOISTURE_LEVEL: CRITICAL_LOW",
+        "> CONFIGURING_SENSOR: CAPACITIVE_V3",
+        "> COMPILING_MOISTURE_ALARM_PCB..."
+      ],
+      [ // Quest 3
+        "> DIAGNOSING_DISPLAY_FAILURE...",
+        "> BACKLIGHT_RAIL: 0V",
+        "> ROUTING_POWER: 5V_BOOST_CONVERTER",
+        "> COMPILING_FLEX_LED_STRIP..."
+      ],
+      [ // Quest 4
+        "> MEASURING_ILLUMINANCE...",
+        "> DETECTED: < 1 LUX",
+        "> CONFIGURING: PIR_MOTION_SENSOR_NODE",
+        "> COMPILING_LIGHTING_CONTROLLER..."
+      ]
+    ][activeQuestId];
+
+    let lineIndex = 0;
+    const interval = setInterval(() => {
+      if (lineIndex < prompts.length) {
+        setLines(prev => [...prev, prompts[lineIndex]]);
+        lineIndex++;
+      } else {
+        clearInterval(interval);
+        setTimeout(onComplete, 500);
+      }
+    }, 800); // Add a line every 800ms
+
+    return () => clearInterval(interval);
+  }, [activeQuestId, onComplete]);
+
+  return (
+    <>
+      {lines.map((line, i) => (
+        <div key={i} className="animate-in fade-in slide-in-from-left-2 duration-300">
+          <span className="opacity-50 mr-2">{(i + 1).toString().padStart(2, '0')}</span>
+          {line}
+        </div>
+      ))}
+    </>
   );
 };
 
