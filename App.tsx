@@ -12,14 +12,16 @@ const App: React.FC = () => {
   const [activeQuestId, setActiveQuestId] = useState<number>(0);
   const [isHoveringQuest, setIsHoveringQuest] = useState(false);
   const [activeSplitterPart, setActiveSplitterPart] = useState<string | null>(null);
-  const [questStates, setQuestStates] = useState([{ solved: false }, { solved: false }]);
+  const [questStates, setQuestStates] = useState([{ solved: false }, { solved: false }, { solved: false }, { solved: false }]);
   const [tooltipPositions, setTooltipPositions] = useState<Record<string, { x: number, y: number }>>({
     Power_Status: { x: 0, y: 0 },
     Socket_Conflict: { x: 0, y: 0 },
     Moisture_Lvl: { x: 0, y: 0 },
     Light_Lvl: { x: 0, y: 0 },
     LCD_Info: { x: 0, y: 0 },
-    Power_Input: { x: 0, y: 0 }
+    Power_Input: { x: 0, y: 0 },
+    Illuminance: { x: 0, y: 0 },
+    Motion_Radius: { x: 0, y: 0 }
   });
   const audioCtxRef = useRef<AudioContext | null>(null);
 
@@ -122,6 +124,21 @@ const App: React.FC = () => {
           </div>
         )}
 
+        {/* Quest 4 Automatic Solve: PIR Sensor */}
+        {gameState === GameState.BUILDING && activeQuestId === 3 && (
+          <div className="pointer-events-auto flex items-center justify-center animate-in zoom-in-105 duration-500">
+            <div className="text-yellow-400 font-mono text-xl animate-pulse font-bold tracking-widest">COMPILING PIR SENSOR NODE...</div>
+            {setTimeout(() => {
+              setGameState(GameState.CHARGING);
+              setQuestStates(prev => {
+                const newStates = [...prev];
+                newStates[3] = { solved: true };
+                return newStates;
+              });
+            }, 2000) && null}
+          </div>
+        )}
+
         {/* State: Solved / manifest */}
         {gameState === GameState.CHARGING && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -159,10 +176,20 @@ const App: React.FC = () => {
               </div>
             )}
 
+            {activeQuestId === 3 && (
+              <div className="bg-blue-950/95 border-2 border-yellow-400 p-6 rounded-xl backdrop-blur-xl animate-in zoom-in-95 pointer-events-auto max-w-[350px] shadow-[0_0_50px_rgba(250,204,21,0.3)] font-mono">
+                <div className="text-yellow-400 font-bold text-2xl mb-2 tracking-widest flex items-center gap-2">
+                  <span>💡</span> MOTION DETECTED
+                </div>
+                <div className="text-blue-200 text-xs uppercase font-bold">Lighting Zones: Active</div>
+                <div className="text-[10px] text-blue-400 mt-2">PWM Dimmer: 60% Duty Cycle</div>
+              </div>
+            )}
+
             <div className="absolute bottom-12 flex flex-col items-center gap-4 animate-in slide-in-from-bottom-8">
               <div className="text-green-500 text-[10px] flex items-center gap-2 tracking-[0.5em] font-black uppercase">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                {activeQuestId === 0 ? 'Hardware_Verified' : activeQuestId === 1 ? 'Biological_Asset_Saved' : 'Retro_Hardware_Fixed'}
+                {activeQuestId === 0 ? 'Hardware_Verified' : activeQuestId === 1 ? 'Biological_Asset_Saved' : activeQuestId === 2 ? 'Retro_Hardware_Fixed' : 'Lighting_Optimized'}
               </div>
               <button onClick={() => setGameState(GameState.DASHBOARD)} className="pointer-events-auto bg-[#0038DF] text-white px-10 py-4 rounded-full font-black text-sm uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-blue-900/20">
                 Back to Dashboard
@@ -236,6 +263,29 @@ const App: React.FC = () => {
             anchorSide="right"
             active={gameState === GameState.OBSERVING}
             position={{ top: '60%', left: '75%', anchorX: `${tooltipPositions.Power_Input?.x}px`, anchorY: `${tooltipPositions.Power_Input?.y}px` }}
+          />
+        </>
+      )}
+
+      {/* Tooltips for 3D anchors - QUEST 4 (MIDNIGHT SNACK) */}
+      {activeQuestId === 3 && (
+        <>
+          <TetheredTooltip
+            id="Illuminance"
+            label="LIGHT_METER"
+            text="ILLUMINANCE: < 1.0 LUX // EYE_STRAIN_RISK"
+            anchorSide="left"
+            active={gameState === GameState.OBSERVING}
+            position={{ top: '30%', left: '20%', anchorX: `${tooltipPositions.Illuminance?.x}px`, anchorY: `${tooltipPositions.Illuminance?.y}px` }}
+            isCritical={true}
+          />
+          <TetheredTooltip
+            id="Motion_Radius"
+            label="SENSOR_PROJECTION"
+            text="MOTION_DETECTION_RADIUS: 1.5M"
+            anchorSide="right"
+            active={gameState === GameState.OBSERVING}
+            position={{ top: '65%', left: '60%', anchorX: `${tooltipPositions.Motion_Radius?.x}px`, anchorY: `${tooltipPositions.Motion_Radius?.y}px` }}
           />
         </>
       )}

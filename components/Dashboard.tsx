@@ -133,9 +133,40 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartQuest, questStates }) => {
             </div>
           </div>
 
-          {/* Tile 4: Locked */}
-          <div className="w-[180px] h-[256px] bg-[#EDEDED] border-[0.3px] border-[#AEAEAE] rounded-[12px] mt-[9px] opacity-40 flex items-center justify-center">
-            <span className="text-2xl">🔒</span>
+          {/* Tile 4: The Midnight Snack (Unlocked) */}
+          <div
+            onClick={() => onStartQuest(3)}
+            className={`relative rounded-3xl p-6 cursor-pointer transition-all hover:scale-105 active:scale-95 overflow-hidden duration-300 shadow-md border-2 border-transparent hover:border-blue-900 group ${questStates[3]?.solved ? 'bg-blue-950' : 'bg-[#000022]'}`}
+          >
+            {/* Playlet: Moonlight Flicker */}
+            {!questStates[3]?.solved && (
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute inset-0 bg-blue-900/20 mix-blend-overlay"></div>
+                {/* Simulating a flickering light source */}
+                <div className="absolute top-0 right-0 w-[150%] h-[150%] bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,200,0.1),transparent_70%)] animate-pulse opacity-50 translate-x-10 -translate-y-10"></div>
+              </div>
+            )}
+
+            {questStates[3]?.solved ? (
+              <div className="relative z-10 flex flex-col items-center justify-center h-full text-blue-100">
+                <div className="text-4xl mb-2">💡</div>
+                <div className="text-[10px] font-black uppercase tracking-tighter text-yellow-200">Motion Detected</div>
+                <div className="mt-2 text-[8px] font-mono text-blue-300">Zone: Active</div>
+              </div>
+            ) : (
+              <div className="relative z-10 flex flex-col items-center justify-center h-full">
+                <div className="text-4xl mb-2 transition-transform duration-1000 group-hover:translate-y-[-5px]">🌙</div>
+                <div className="text-[10px] font-bold text-blue-200 uppercase tracking-widest text-center">The Midnight Snack</div>
+                <div className="mt-2 text-[8px] text-yellow-100 font-mono opacity-60">Preview: Sensor Logic</div>
+              </div>
+            )}
+
+            {/* Status Dots */}
+            <div className="absolute bottom-2 left-2 flex gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-900"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+            </div>
           </div>
         </div>
       </div>
