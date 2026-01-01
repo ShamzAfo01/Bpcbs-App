@@ -98,9 +98,39 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartQuest, questStates }) => {
             </div>
           </div>
 
-          {/* Tile 3: Locked */}
-          <div className="w-[180px] h-[256px] bg-[#EDEDED] border-[0.3px] border-[#AEAEAE] rounded-[12px] mt-[9px] opacity-40 flex items-center justify-center">
-            <span className="text-2xl">🔒</span>
+          {/* Tile 3: The Retro Revival (Unlocked) */}
+          <div
+            onClick={() => onStartQuest(2)}
+            className={`relative rounded-3xl p-6 cursor-pointer transition-all hover:scale-105 active:scale-95 overflow-hidden duration-300 shadow-md border-2 border-transparent hover:border-gray-500 group ${questStates[2]?.solved ? 'bg-gray-200' : 'bg-[#1a1a1a]'}`}
+          >
+            {/* Playlet: Retro Static Noise */}
+            {!questStates[2]?.solved && (
+              <div className="absolute inset-0 pointer-events-none opacity-30 overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif')] bg-cover opacity-10 mix-blend-overlay"></div>
+                <div className="absolute top-[20%] left-[10%] w-[80%] h-[2px] bg-green-500 animate-pulse shadow-[0_0_10px_#0F0]"></div>
+              </div>
+            )}
+
+            {questStates[2]?.solved ? (
+              <div className="relative z-10 flex flex-col items-center justify-center h-full text-gray-800">
+                <div className="text-4xl mb-2">💾</div>
+                <div className="text-[10px] font-black uppercase tracking-tighter">System Restored</div>
+                <div className="mt-2 text-[8px] font-mono">Status: Online</div>
+              </div>
+            ) : (
+              <div className="relative z-10 flex flex-col items-center justify-center h-full">
+                <div className="text-4xl mb-2 transition-transform duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0">👾</div>
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Retro Revival</div>
+                <div className="mt-2 text-[8px] text-green-500 font-mono animate-pulse">Preview: Display Repair</div>
+              </div>
+            )}
+
+            {/* Status Dots */}
+            <div className="absolute bottom-2 left-2 flex gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-gray-500"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+            </div>
           </div>
 
           {/* Tile 4: Locked */}

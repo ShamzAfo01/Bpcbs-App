@@ -265,6 +265,96 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
       pcb.position.set(0, 0.26, 0.05);
       pcb.visible = false;
       scene.add(pcb);
+
+    } else if (activeQuestId === 2) {
+      console.log("Generating Quest 3 Assets");
+      // === QUEST 3: RETRO REVIVAL ===
+
+      // Environment: Dark Surface
+      const tableMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+      const table = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), tableMat);
+      table.rotation.x = -Math.PI / 2;
+      table.receiveShadow = true;
+      scene.add(table);
+
+      // Asset: Handheld Console
+      const consoleGroup = new THREE.Group();
+
+      // Body: Grey Plastic
+      const bodyGeo = new THREE.BoxGeometry(0.3, 0.05, 0.5);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.4 });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      consoleGroup.add(body);
+
+      // Screen: Olive-Drab LCD (Unlit)
+      const screenGeo = new THREE.PlaneGeometry(0.2, 0.2);
+      const screenMat = new THREE.MeshStandardMaterial({
+        color: 0x2A321B, // Olive-Drab
+        roughness: 0.2,
+        metalness: 0.1,
+        side: THREE.DoubleSide
+      });
+      const screen = new THREE.Mesh(screenGeo, screenMat);
+      screen.rotation.x = -Math.PI / 2;
+      screen.position.y = 0.026; // Slightly above body
+      screen.position.z = -0.05;
+      screen.name = "retro_screen";
+      consoleGroup.add(screen);
+
+      // Screen Bezel (optional detail)
+      const bezelGeo = new THREE.BoxGeometry(0.22, 0.01, 0.22);
+      const bezelMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+      const bezel = new THREE.Mesh(bezelGeo, bezelMat);
+      bezel.position.y = 0.026;
+      bezel.position.z = -0.05;
+      bezel.scale.set(1.1, 1, 1.1);
+      // We'd ideally cut a hole, but for now just place screen on top of body and bezel around it or just imply it. 
+      // Simplified: Just the screen on the body is fine for now.
+
+      consoleGroup.position.set(0, 0.025, 0);
+      scene.add(consoleGroup);
+
+      // Quest Marker: Cyan Glowing Question Mark
+      const qGroup = new THREE.Group();
+      const qMat = new THREE.MeshStandardMaterial({
+        color: 0x00FFFF,
+        emissive: 0x00FFFF,
+        emissiveIntensity: 3,
+        toneMapped: false // helps glow
+      });
+
+      const qTop = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.01, 16, 32, Math.PI * 1.5), qMat);
+      qTop.rotation.z = Math.PI / 4;
+      qTop.rotation.y = Math.PI;
+      qTop.position.y = 0.05;
+      qGroup.add(qTop);
+      const qDot = new THREE.Mesh(new THREE.SphereGeometry(0.015), qMat);
+      qDot.position.y = -0.04;
+      qGroup.add(qDot);
+
+      qGroup.position.set(0, 0.1, -0.05); // Centered on screen approx
+      scene.add(qGroup);
+      questMarkRef.current = qGroup;
+
+      // Backlight LED Strip (Hidden)
+      const ledStrip = new THREE.Group();
+      ledStrip.name = "led_strip";
+      const pcbStrip = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.01), new THREE.MeshStandardMaterial({ color: 0x004400, side: THREE.DoubleSide }));
+      pcbStrip.rotation.x = -Math.PI / 2;
+      ledStrip.add(pcbStrip);
+
+      // Emulated LEDs
+      for (let i = 0; i < 5; i++) {
+        const led = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.005, 0.01), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 2 }));
+        led.position.set((i - 2) * 0.04, 0.005, 0);
+        ledStrip.add(led);
+      }
+
+      ledStrip.position.set(0, 0.02, 0.2); // Start outside
+      ledStrip.visible = false;
+      scene.add(ledStrip);
     }
 
     const animate = () => {
