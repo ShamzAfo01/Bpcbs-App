@@ -52,18 +52,40 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
       camera.updateProjectionMatrix();
       camera.position.set(0.8, 1.4, 1.2);
       camera.lookAt(0, 0, 0);
+    } else if (activeQuestId === 2) {
+      // Quest 3: Macro Close-up
+      camera.fov = 45;
+      camera.updateProjectionMatrix();
+      camera.position.set(0, 0.5, 0.4); // Close up top-down-ish
+      camera.lookAt(0, 0, 0);
     }
     cameraRef.current = camera;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    // Lighting Setup
+    if (activeQuestId === 2) {
+      // Environment: Total Darkness with Desktop Lamp
+      scene.add(new THREE.AmbientLight(0xffffff, 0.1)); // 0.1 Ambient
 
-    // Lighting: Directional_Light (Sunlight) from Window_Side
-    const sunLight = new THREE.DirectionalLight(0xFFF4E0, 2.5); // Warm Sunlight
-    sunLight.position.set(5, 5, 2);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
-    scene.add(sunLight);
+      const spotLight = new THREE.SpotLight(0xffffff, 10); // Spotlight_DesktopLamp
+      spotLight.position.set(2, 2, 0.5); // Side angle
+      spotLight.angle = Math.PI / 8; // Narrow beam
+      spotLight.penumbra = 0.5;
+      spotLight.castShadow = true;
+      spotLight.shadow.mapSize.width = 1024;
+      spotLight.shadow.mapSize.height = 1024;
+      scene.add(spotLight);
+    } else {
+      // Default Lighting
+      scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+      // Lighting: Directional_Light (Sunlight) from Window_Side
+      const sunLight = new THREE.DirectionalLight(0xFFF4E0, 2.5); // Warm Sunlight
+      sunLight.position.set(5, 5, 2);
+      sunLight.castShadow = true;
+      sunLight.shadow.mapSize.width = 1024;
+      sunLight.shadow.mapSize.height = 1024;
+      scene.add(sunLight);
+    }
 
     // --- SCENE GENERATION BASED ON ACTIVE QUEST ---
     console.log("ThreeScene useEffect running. activeQuestId:", activeQuestId);
@@ -472,6 +494,34 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
             pcb.visible = true;
             gsap.from(pcb.scale, { x: 0, y: 0, z: 0, duration: 1, ease: 'back.out(1.7)' });
           }
+        }
+      } else if (activeQuestId === 2) {
+        // Quest 3 Specific Success Animation
+        questMarkRef.current.visible = false;
+
+        // Slide in LED Strip
+        const ledStrip = sceneRef.current?.getObjectByName('led_strip');
+        if (ledStrip) {
+          ledStrip.visible = true;
+          // Animate sliding under the screen (z: 0.2 -> -0.05)
+          gsap.to(ledStrip.position, { z: -0.05, duration: 1.5, ease: "power2.inOut" });
+        }
+
+        // Light up the Screen
+        const screen = sceneRef.current?.getObjectByName('retro_screen') as THREE.Mesh;
+        if (screen) {
+          gsap.to((screen.material as THREE.MeshStandardMaterial), {
+            emissive: 0x2A321B,
+            emissiveIntensity: 2,
+            duration: 0.5,
+            delay: 1.2 // Wait for strip to slide in
+          });
+          // Optional: Change color to clearer green
+          gsap.to((screen.material as THREE.MeshStandardMaterial).color, {
+            r: 0.5, g: 0.7, b: 0.1,
+            duration: 0.5,
+            delay: 1.2
+          });
         }
       }
 
