@@ -39,26 +39,26 @@ const App: React.FC = () => {
 
   return (
     <div className="relative min-h-screen w-full bg-[#020205] overflow-hidden text-stone-200 font-mono flex items-center justify-center">
-      
+
       {/* Three.js Background Layer - Always active but camera changes */}
-      <ThreeScene 
+      <ThreeScene
         gameState={gameState}
-        activeQuestId={activeQuestId} 
-        onQuestTap={handleQuestTap} 
+        activeQuestId={activeQuestId}
+        onQuestTap={handleQuestTap}
         onQuestHover={setIsHoveringQuest}
         onSplitterHover={setActiveSplitterPart}
-        updateTooltipPos={updateTooltipPos} 
+        updateTooltipPos={updateTooltipPos}
       />
 
       {/* Interface Manager */}
       <div className="absolute inset-0 z-[999] pointer-events-none flex items-center justify-center">
-        
+
         {/* State: Dashboard Hub */}
         {gameState === GameState.DASHBOARD && (
           <div className="animate-in fade-in zoom-in-95 duration-700">
-            <Dashboard 
-              onStartQuest={handleQuestStart} 
-              questStates={questStates} 
+            <Dashboard
+              onStartQuest={handleQuestStart}
+              questStates={questStates}
             />
           </div>
         )}
@@ -68,10 +68,10 @@ const App: React.FC = () => {
           <>
             <FloatingHud />
             <div className="absolute bottom-16 flex flex-col items-center gap-6 animate-in fade-in slide-in-from-bottom-4">
-               <button onClick={handleQuestTap} className="pointer-events-auto bg-black/80 border-2 border-cyan-400 text-cyan-400 px-12 py-5 font-black text-xl tracking-[0.3em] uppercase animate-solve-pulse transition-all hover:scale-110 hover:bg-cyan-400 hover:text-black shadow-[0_0_30px_rgba(34,211,238,0.2)]">
+              <button onClick={handleQuestTap} className="pointer-events-auto bg-black/80 border-2 border-cyan-400 text-cyan-400 px-12 py-5 font-black text-xl tracking-[0.3em] uppercase animate-solve-pulse transition-all hover:scale-110 hover:bg-cyan-400 hover:text-black shadow-[0_0_30px_rgba(34,211,238,0.2)]">
                 TAP HERE TO SOLVE
               </button>
-               <button onClick={() => setGameState(GameState.DASHBOARD)} className="pointer-events-auto text-[10px] text-stone-500 underline uppercase tracking-widest hover:text-stone-300">Return to Hub</button>
+              <button onClick={() => setGameState(GameState.DASHBOARD)} className="pointer-events-auto text-[10px] text-stone-500 underline uppercase tracking-widest hover:text-stone-300">Return to Hub</button>
             </div>
           </>
         )}
@@ -79,32 +79,32 @@ const App: React.FC = () => {
         {/* State: Builder Interface */}
         {gameState === GameState.BUILDING && activeQuestId === 0 && (
           <div className="pointer-events-auto animate-in zoom-in-105 duration-500">
-             <SplitterBuilder onComplete={() => {
-                setGameState(GameState.CHARGING);
-                setQuestStates(prev => {
-                    const newStates = [...prev];
-                    newStates[0].solved = true;
-                    return newStates;
-                });
-             }} />
+            <SplitterBuilder onComplete={() => {
+              setGameState(GameState.CHARGING);
+              setQuestStates(prev => {
+                const newStates = [...prev];
+                newStates[0].solved = true;
+                return newStates;
+              });
+            }} />
           </div>
         )}
 
         {/* Quest 2 Automatic Solve (No Builder for simplicity in this step, or reuse generic builder later) */}
         {gameState === GameState.BUILDING && activeQuestId === 1 && (
-            // For Quest 2, we simulate an 'instant' build or auto-success for now as per "Program the 'Thirsty Monstera' scene logic" 
-            // The prompt implies we invoke an agent and then it solves. We'll simulate a delay then success.
-            <div className="pointer-events-auto flex items-center justify-center animate-in zoom-in-105 duration-500">
-                 <div className="text-cyan-400 font-mono text-xl animate-pulse">DEPLOYING MOISTURE SENSORS...</div>
-                 {setTimeout(() => {
-                     setGameState(GameState.CHARGING);
-                     setQuestStates(prev => {
-                        const newStates = [...prev];
-                        newStates[1].solved = true;
-                        return newStates;
-                     });
-                 }, 2000) && null}
-            </div>
+          // For Quest 2, we simulate an 'instant' build or auto-success for now as per "Program the 'Thirsty Monstera' scene logic" 
+          // The prompt implies we invoke an agent and then it solves. We'll simulate a delay then success.
+          <div className="pointer-events-auto flex items-center justify-center animate-in zoom-in-105 duration-500">
+            <div className="text-cyan-400 font-mono text-xl animate-pulse">DEPLOYING MOISTURE SENSORS...</div>
+            {setTimeout(() => {
+              setGameState(GameState.CHARGING);
+              setQuestStates(prev => {
+                const newStates = [...prev];
+                newStates[1].solved = true;
+                return newStates;
+              });
+            }, 2000) && null}
+          </div>
         )}
 
         {/* State: Solved / manifest */}
@@ -124,12 +124,12 @@ const App: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             {activeQuestId === 1 && (
-                 <div className="bg-black/95 border border-green-500 p-5 rounded-2xl backdrop-blur-2xl animate-in zoom-in-95 pointer-events-auto max-w-[320px] shadow-[0_0_50px_rgba(34,197,94,0.4)]">
-                    <div className="text-green-500 font-black text-xl mb-2">SYSTEM STABILIZED</div>
-                    <div className="text-stone-300 text-xs">Moisture levels optimal. Plant health restoring.</div>
-                 </div>
+              <div className="bg-black/95 border border-green-500 p-5 rounded-2xl backdrop-blur-2xl animate-in zoom-in-95 pointer-events-auto max-w-[320px] shadow-[0_0_50px_rgba(34,197,94,0.4)]">
+                <div className="text-green-500 font-black text-xl mb-2">SYSTEM STABILIZED</div>
+                <div className="text-stone-300 text-xs">Moisture levels optimal. Plant health restoring.</div>
+              </div>
             )}
 
             <div className="absolute bottom-12 flex flex-col items-center gap-4 animate-in slide-in-from-bottom-8">
@@ -147,47 +147,47 @@ const App: React.FC = () => {
 
       {/* Tooltips for 3D anchors - QUEST 1 */}
       {activeQuestId === 0 && (
-          <>
-            <TetheredTooltip 
-                id="Socket_Conflict"
-                label="HW_CONFLICT_DETECTED"
-                text="SOCKET: OCCUPIED BY LAMP_V2"
-                anchorSide="right"
-                active={gameState === GameState.OBSERVING && isHoveringQuest}
-                position={{ top: '38%', left: '30%', anchorX: `${tooltipPositions.Socket_Conflict.x}px`, anchorY: `${tooltipPositions.Socket_Conflict.y}px` }}
-            />
-            <TetheredTooltip 
-                id="Power_Status"
-                label="LPT_BATT_STATUS"
-                text="CRITICAL: 1% | REQ: 60W PD"
-                anchorSide="left"
-                active={gameState === GameState.ZOOMING || gameState === GameState.BUILDING}
-                position={{ top: '25%', left: '15%', anchorX: `${tooltipPositions.Power_Status.x}px`, anchorY: `${tooltipPositions.Power_Status.y}px` }}
-            />
-          </>
+        <>
+          <TetheredTooltip
+            id="Socket_Conflict"
+            label="HW_CONFLICT_DETECTED"
+            text="SOCKET: OCCUPIED BY LAMP_V2"
+            anchorSide="right"
+            active={gameState === GameState.OBSERVING && isHoveringQuest}
+            position={{ top: '38%', left: '30%', anchorX: `${tooltipPositions.Socket_Conflict.x}px`, anchorY: `${tooltipPositions.Socket_Conflict.y}px` }}
+          />
+          <TetheredTooltip
+            id="Power_Status"
+            label="LPT_BATT_STATUS"
+            text="CRITICAL: 1% | REQ: 60W PD"
+            anchorSide="left"
+            active={gameState === GameState.ZOOMING || gameState === GameState.BUILDING}
+            position={{ top: '25%', left: '15%', anchorX: `${tooltipPositions.Power_Status.x}px`, anchorY: `${tooltipPositions.Power_Status.y}px` }}
+          />
+        </>
       )}
 
       {/* Tooltips for 3D anchors - QUEST 2 */}
       {activeQuestId === 1 && (
-          <>
-             <TetheredTooltip 
-                id="Moisture_Lvl"
-                label="MOISTURE_LVL"
-                text="12% | STATUS: CRITICAL"
-                anchorSide="left"
-                active={gameState === GameState.OBSERVING} // Always visible on load
-                position={{ top: '20%', left: '20%', anchorX: `${tooltipPositions.Moisture_Lvl.x}px`, anchorY: `${tooltipPositions.Moisture_Lvl.y}px` }}
-                isCritical={true}
-             />
-             <TetheredTooltip 
-                id="Light_Lvl"
-                label="LIGHT_LVL"
-                text="SUNLIGHT: OPTIMAL"
-                anchorSide="right"
-                active={gameState === GameState.OBSERVING} // Should animate in after 1.5s, controlled by CSS or internal state if needed, for now always active
-                position={{ top: '20%', left: '70%', anchorX: `${tooltipPositions.Light_Lvl.x}px`, anchorY: `${tooltipPositions.Light_Lvl.y}px` }}
-             />
-          </>
+        <>
+          <TetheredTooltip
+            id="Moisture_Lvl"
+            label="MOISTURE_LVL"
+            text="12% | STATUS: CRITICAL"
+            anchorSide="left"
+            active={gameState === GameState.OBSERVING} // Always visible on load
+            position={{ top: '20%', left: '20%', anchorX: `${tooltipPositions.Moisture_Lvl.x}px`, anchorY: `${tooltipPositions.Moisture_Lvl.y}px` }}
+            isCritical={true}
+          />
+          <TetheredTooltip
+            id="Light_Lvl"
+            label="LIGHT_LVL"
+            text="SUNLIGHT: OPTIMAL"
+            anchorSide="right"
+            active={gameState === GameState.OBSERVING} // Should animate in after 1.5s, controlled by CSS or internal state if needed, for now always active
+            position={{ top: '20%', left: '70%', anchorX: `${tooltipPositions.Light_Lvl.x}px`, anchorY: `${tooltipPositions.Light_Lvl.y}px` }}
+          />
+        </>
       )}
 
 

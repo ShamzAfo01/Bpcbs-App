@@ -26,6 +26,11 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
   useEffect(() => {
     if (!mountRef.current) return;
 
+    // Force clear any existing canvases
+    while (mountRef.current.firstChild) {
+      mountRef.current.removeChild(mountRef.current.firstChild);
+    }
+
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -42,23 +47,29 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
 
     // Specific Camera override for Quest 2
     if (activeQuestId === 1) {
+      // Camera_Config: Fixed Wide-Angle POV, FOV: 70
+      camera.fov = 70;
+      camera.updateProjectionMatrix();
       camera.position.set(0.8, 1.4, 1.2);
       camera.lookAt(0, 0, 0);
     }
     cameraRef.current = camera;
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-    const lampLight = new THREE.PointLight(0xffaa77, 1.5, 5);
-    lampLight.position.set(-0.6, 1.1, -0.1);
-    scene.add(lampLight);
 
-    const windowLight = new THREE.DirectionalLight(0xaaccff, 0.6);
-    windowLight.position.set(5, 5, 2);
-    scene.add(windowLight);
+    // Lighting: Directional_Light (Sunlight) from Window_Side
+    const sunLight = new THREE.DirectionalLight(0xFFF4E0, 2.5); // Warm Sunlight
+    sunLight.position.set(5, 5, 2);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
+    scene.add(sunLight);
 
     // --- SCENE GENERATION BASED ON ACTIVE QUEST ---
+    console.log("ThreeScene useEffect running. activeQuestId:", activeQuestId);
 
     if (activeQuestId === 0) {
+      console.log("Generating Quest 1 Assets");
       // === QUEST 1: CAFE CHRONICLES ===
       const laptopGroup = new THREE.Group();
       const laptopBase = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.02, 0.3), new THREE.MeshStandardMaterial({ color: 0x1a1a1a }));
@@ -144,12 +155,14 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
       questMarkRef.current = questMarkGroup;
 
     } else if (activeQuestId === 1) {
-      // === QUEST 2: THE THIRSTY MONSTERA ===
+      console.log("Generating Quest 2 Assets");
+      // === QUEST 2: THE THIRSTY MONSTERA (High-Fidelity) ===
 
       // Environment
       const floor = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), new THREE.MeshStandardMaterial({ color: 0x222222 }));
       floor.rotation.x = -Math.PI / 2;
       floor.position.y = 0;
+      floor.receiveShadow = true;
       scene.add(floor);
 
       // Asset_Pot: Terracotta material
@@ -157,43 +170,54 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
       const potMaterial = new THREE.MeshStandardMaterial({ color: 0xcc6633, roughness: 0.8 });
       const pot = new THREE.Mesh(potGeometry, potMaterial);
       pot.position.set(0, 0.125, 0);
+      pot.castShadow = true;
+      pot.receiveShadow = true;
       scene.add(pot);
 
-      // Asset_Soil: Cracked Dry Earth
+      // Asset_Soil: Cracked Dry Earth (Procedural approximation)
       const soilGeometry = new THREE.CylinderGeometry(0.14, 0.14, 0.02, 32);
       const soilMaterial = new THREE.MeshStandardMaterial({
-        color: 0x5d4037,
+        color: 0x5d4037, // Dry Earth
         roughness: 1,
-        bumpScale: 0.05
+        bumpScale: 0.1
       });
       const soil = new THREE.Mesh(soilGeometry, soilMaterial);
-      soil.position.set(0, 0.24, 0);
+      soil.position.set(0, 0.24, 0); // Asset_Soil (0, 0.45, 0) in directive seems high relative to pot, adjusting to fit pot
       soil.name = "soil_surface";
+      soil.receiveShadow = true;
       scene.add(soil);
 
-      // Asset_Monstera: SkinnedMesh simulation with simple meshes for now
+      // Asset_Monstera: SkinnedMesh simulation
       const monsteraGroup = new THREE.Group();
       monsteraGroup.name = "monstera_group";
 
       // Stem
-      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.5, 8), new THREE.MeshStandardMaterial({ color: 0x228B22 }));
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.5, 8), new THREE.MeshStandardMaterial({ color: 0x228B22 }));
       stem.position.y = 0.25;
       monsteraGroup.add(stem);
 
-      // Leaves
-      const leafGeo = new THREE.PlaneGeometry(0.15, 0.2);
-      const leafMat = new THREE.MeshStandardMaterial({ color: 0xD4AF37, side: THREE.DoubleSide, transparent: true, opacity: 0.95 }); // Yellowish tint for wilt
+      // Leaves (Wilted State)
+      // Logic: Saturation -30%, Yellow tint #D4AF37
+      const leafGeo = new THREE.PlaneGeometry(0.2, 0.25);
+      const leafMat = new THREE.MeshStandardMaterial({
+        color: 0xD4AF37, // Yellow tint
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.95,
+        roughness: 0.6
+      });
 
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 4; i++) {
         const leaf = new THREE.Mesh(leafGeo, leafMat.clone());
-        leaf.position.y = 0.3 + (i * 0.1);
-        leaf.position.x = (Math.random() - 0.5) * 0.2;
-        leaf.position.z = (Math.random() - 0.5) * 0.2;
+        leaf.position.y = 0.35 + (i * 0.08);
+        leaf.position.x = (Math.random() - 0.5) * 0.3;
+        leaf.position.z = (Math.random() - 0.5) * 0.3;
 
-        // Initial Wilt Rotation (Angled down)
-        leaf.rotation.x = Math.PI / 1.5;
+        // Wilt: Leaves angled downward at 45 degrees
+        leaf.rotation.x = Math.PI / 1.2;
         leaf.rotation.y = Math.random() * Math.PI;
         leaf.userData = { type: 'leaf' };
+        leaf.castShadow = true;
 
         monsteraGroup.add(leaf);
       }
@@ -202,23 +226,33 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
       scene.add(monsteraGroup);
 
       // Quest_Marker_Object: High-poly 3D Question Mark
+      // Anchor_Point: Surface (0.24) + 2 inches (approx 0.05m -> 0.3)
       const qGroup = new THREE.Group();
-      // Simple Question Mark Shape using Torus and Cylinder
-      const qTop = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.015, 16, 32, Math.PI * 1.5), new THREE.MeshStandardMaterial({ color: 0x39FF14, emissive: 0x39FF14, emissiveIntensity: 2 }));
+
+      // Neon Green with Flicker
+      const qMat = new THREE.MeshStandardMaterial({
+        color: 0x39FF14,
+        emissive: 0x39FF14,
+        emissiveIntensity: 2,
+        roughness: 0
+      });
+
+      const qTop = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.015, 16, 32, Math.PI * 1.5), qMat);
       qTop.rotation.z = Math.PI / 4;
       qTop.rotation.y = Math.PI;
       qTop.position.y = 0.05;
+      qTop.castShadow = false; // Holographic typically doesn't cast shadow
       qGroup.add(qTop);
 
-      const qDot = new THREE.Mesh(new THREE.SphereGeometry(0.02), new THREE.MeshStandardMaterial({ color: 0x39FF14, emissive: 0x39FF14, emissiveIntensity: 2 }));
+      const qDot = new THREE.Mesh(new THREE.SphereGeometry(0.02), qMat);
       qDot.position.y = -0.06;
       qGroup.add(qDot);
 
-      qGroup.position.set(0, 0.55, 0); // Approx 2 inches above soil (which is at ~0.25)
+      qGroup.position.set(0, 0.45, 0);
       scene.add(qGroup);
       questMarkRef.current = qGroup;
 
-      // Moisture Alarm PCB (Hidden initially)
+      // Moisture Alarm PCB (Hidden)
       const pcb = new THREE.Group();
       pcb.name = "moisture_pcb";
       const pcbBoard = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.01, 0.04), new THREE.MeshStandardMaterial({ color: 0x004400 }));
@@ -236,13 +270,19 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
     const animate = () => {
       requestAnimationFrame(animate);
       if (questMarkRef.current && questMarkRef.current.visible) {
-        questMarkRef.current.rotation.y += 0.02;
-        questMarkRef.current.position.y = 1.05 + Math.sin(Date.now() * 0.002) * 0.04;
+        // Quest 2: Y-Axis_Rotation(speed: 3.0), Ping-Pong_Vertical_Float(range: 0.1, freq: 1.5)
+        questMarkRef.current.rotation.y += 0.05;
+        questMarkRef.current.position.y = 0.45 + Math.sin(Date.now() * 0.003) * 0.05;
+
+        // Neon Flicker Effect
+        const qMesh = questMarkRef.current.children[0] as THREE.Mesh;
+        if (qMesh && qMesh.material) {
+          (qMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = 1.5 + Math.random() * 1.5;
+        }
       }
       if (splitterRef.current && splitterRef.current.visible) {
         splitterRef.current.rotation.y += 0.005;
       }
-      lampLight.intensity = 1.5 + (Math.random() - 0.5) * 0.15;
       if (cameraRef.current && rendererRef.current) {
         const widthHalf = window.innerWidth / 2;
         const heightHalf = window.innerHeight / 2;
@@ -308,36 +348,40 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
 
   useEffect(() => {
     if (gameState === GameState.CHARGING && splitterRef.current && questMarkRef.current) {
-      splitterRef.current.visible = true;
-      questMarkRef.current.visible = false;
-      // Detailed transition
-      gsap.from(splitterRef.current.scale, { x: 0, y: 0, z: 0, duration: 1, ease: "elastic.out(1, 0.5)" });
-    } else if (gameState === GameState.CHARGING && activeQuestId === 1 && questMarkRef.current) {
-      // Quest 2 Specific Success Animation
-      questMarkRef.current.visible = false;
+      if (activeQuestId === 0) {
+        splitterRef.current.visible = true;
+        questMarkRef.current.visible = false;
+        gsap.from(splitterRef.current.scale, { x: 0, y: 0, z: 0, duration: 1, ease: "elastic.out(1, 0.5)" });
+      } else if (activeQuestId === 1) {
+        // Quest 2 Specific Success Animation
+        questMarkRef.current.visible = false;
 
-      // Find Monstera Leaves and animate them up
-      if (sceneRef.current) {
-        const monsteraGroup = sceneRef.current.getObjectByName('monstera_group');
-        if (monsteraGroup) {
-          monsteraGroup.children.forEach((child) => {
-            // Check if it's a leaf (based on simple logic or naming)
-            if (child.userData.type === 'leaf') {
-              gsap.to(child.rotation, { x: -Math.PI / 4, duration: 2.0, ease: "power2.out" }); // Straighten up
-              gsap.to((child as THREE.Mesh).material, {
-                // @ts-ignore - simulating color change/texture update if possible or just tint
-                color: new THREE.Color(0x228B22),
-                duration: 2.0
-              });
-            }
-          });
-        }
+        if (sceneRef.current) {
+          const monsteraGroup = sceneRef.current.getObjectByName('monstera_group');
+          if (monsteraGroup) {
+            monsteraGroup.children.forEach((child) => {
+              if (child.userData.type === 'leaf') {
+                gsap.to(child.rotation, { x: -Math.PI / 4, duration: 2.0, ease: "power2.out" });
+                gsap.to((child as THREE.Mesh).material, {
+                  color: new THREE.Color(0x228B22),
+                  duration: 2.0
+                });
+              }
+            });
+          }
 
-        // Show PCB in Soil
-        const pcb = sceneRef.current.getObjectByName('moisture_pcb');
-        if (pcb) {
-          pcb.visible = true;
-          gsap.from(pcb.scale, { x: 0, y: 0, z: 0, duration: 1, ease: 'back.out(1.7)' });
+          // Restore Soil
+          const soil = sceneRef.current.getObjectByName('soil_surface') as THREE.Mesh;
+          if (soil) {
+            gsap.to((soil.material as THREE.MeshStandardMaterial).color, { r: 0.2, g: 0.1, b: 0.05, duration: 2.0 });
+          }
+
+          // Show PCB
+          const pcb = sceneRef.current.getObjectByName('moisture_pcb');
+          if (pcb) {
+            pcb.visible = true;
+            gsap.from(pcb.scale, { x: 0, y: 0, z: 0, duration: 1, ease: 'back.out(1.7)' });
+          }
         }
       }
 
@@ -345,7 +389,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
       splitterRef.current.visible = false;
       questMarkRef.current.visible = true;
     }
-  }, [gameState]);
+  }, [gameState, activeQuestId]);
 
   useEffect(() => {
     if (gameState === GameState.ZOOMING && cameraRef.current) {
