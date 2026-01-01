@@ -58,6 +58,12 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
       camera.updateProjectionMatrix();
       camera.position.set(0, 0.5, 0.4); // Close up top-down-ish
       camera.lookAt(0, 0, 0);
+    } else if (activeQuestId === 3) {
+      // Quest 4: Kitchen Wide Angle
+      camera.fov = 60;
+      camera.updateProjectionMatrix();
+      camera.position.set(0, 1.5, 2.5);
+      camera.lookAt(0, 1.0, 0);
     }
     cameraRef.current = camera;
 
@@ -69,11 +75,21 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
       const spotLight = new THREE.SpotLight(0xffffff, 10); // Spotlight_DesktopLamp
       spotLight.position.set(2, 2, 0.5); // Side angle
       spotLight.angle = Math.PI / 8; // Narrow beam
-      spotLight.penumbra = 0.5;
       spotLight.castShadow = true;
-      spotLight.shadow.mapSize.width = 1024;
-      spotLight.shadow.mapSize.height = 1024;
       scene.add(spotLight);
+    } else if (activeQuestId === 3) {
+      // Environment: Midnight Blue Moonlight
+      const ambient = new THREE.AmbientLight(0x000044, 0.1);
+      scene.add(ambient);
+
+      // Deep Blue Moonlight
+      const moonLight = new THREE.DirectionalLight(0x000088, 5.0);
+      moonLight.position.set(-5, 5, 2); // Window source
+      moonLight.castShadow = true;
+      moonLight.shadow.mapSize.width = 4096;
+      moonLight.shadow.mapSize.height = 4096;
+      scene.add(moonLight);
+
     } else {
       // Default Lighting
       scene.add(new THREE.AmbientLight(0xffffff, 0.4));
@@ -377,6 +393,97 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
       ledStrip.position.set(0, 0.02, 0.2); // Start outside
       ledStrip.visible = false;
       scene.add(ledStrip);
+
+    } else if (activeQuestId === 3) {
+      console.log("Generating Quest 4 Assets");
+      // === QUEST 4: THE MIDNIGHT SNACK ===
+
+      // Floor
+      const floorGeo = new THREE.PlaneGeometry(10, 10);
+      const floorMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // Wall
+      const wallGeo = new THREE.PlaneGeometry(10, 5);
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+      const wall = new THREE.Mesh(wallGeo, wallMat);
+      wall.position.z = -1;
+      wall.position.y = 2.5;
+      wall.receiveShadow = true;
+      scene.add(wall);
+
+      // Kitchen Cabinet (Upper)
+      const cabinetGeo = new THREE.BoxGeometry(2, 0.8, 0.6);
+      const cabinetMat = new THREE.MeshStandardMaterial({ color: 0xEEEEEE, roughness: 0.2 });
+      const cabinet = new THREE.Mesh(cabinetGeo, cabinetMat);
+      cabinet.position.set(0, 1.8, -0.7); // High up
+      cabinet.castShadow = true;
+      cabinet.receiveShadow = true;
+      scene.add(cabinet);
+
+      // Countertop
+      const counterGeo = new THREE.BoxGeometry(2, 0.9, 0.8);
+      const counterMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1 });
+      const counter = new THREE.Mesh(counterGeo, counterMat);
+      counter.position.set(0, 0.45, -0.7);
+      counter.receiveShadow = true;
+      counter.castShadow = true;
+      scene.add(counter);
+
+      // Under-Cabinet Lights (Initially OFF)
+      const lightGroup = new THREE.Group();
+      lightGroup.name = "cabinet_lights";
+      const spot1 = new THREE.SpotLight(0xFFDDAA, 0); // Warm White, Int: 0
+      spot1.position.set(-0.5, 1.35, -0.5);
+      spot1.target.position.set(-0.5, 0, -0.5);
+      spot1.angle = Math.PI / 4;
+      spot1.penumbra = 0.5;
+      lightGroup.add(spot1);
+      lightGroup.add(spot1.target);
+
+      const spot2 = new THREE.SpotLight(0xFFDDAA, 0);
+      spot2.position.set(0.5, 1.35, -0.5);
+      spot2.target.position.set(0.5, 0, -0.5);
+      spot2.angle = Math.PI / 4;
+      spot2.penumbra = 0.5;
+      lightGroup.add(spot2);
+      lightGroup.add(spot2.target);
+      scene.add(lightGroup);
+
+      // Holographic Marker (Yellow)
+      const qGroup = new THREE.Group();
+      const qMat = new THREE.MeshBasicMaterial({
+        color: 0xFFFF00,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+      });
+      // Simple ? shape
+      const qTop = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.02, 16, 32, Math.PI * 1.5), qMat);
+      qTop.rotation.z = Math.PI / 4;
+      qTop.rotation.y = Math.PI;
+      qTop.position.y = 0.2;
+      qGroup.add(qTop);
+      const qDot = new THREE.Mesh(new THREE.SphereGeometry(0.04), qMat);
+      qDot.position.y = -0.1;
+      qGroup.add(qDot);
+
+      qGroup.position.set(0, 1.3, -0.5); // Under cabinet center
+      scene.add(qGroup);
+      questMarkRef.current = qGroup;
+
+      // Motion Radius Ring on Floor
+      const ringGeo = new THREE.RingGeometry(1.4, 1.5, 64);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x4444FF, transparent: true, opacity: 0.3, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(0, 0.01, 1.2); // 1.2m from origin
+      ring.name = "motion_ring";
+      scene.add(ring);
     }
 
     const animate = () => {
@@ -408,7 +515,21 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
           // Quest 2 Tooltips
           const soilPos = new THREE.Vector3(0, 0.25, 0).project(cameraRef.current);
           updateTooltipPos('Moisture_Lvl', (soilPos.x * widthHalf) + widthHalf, -(soilPos.y * heightHalf) + heightHalf);
-          updateTooltipPos('Light_Lvl', (soilPos.x * widthHalf) + widthHalf + 200, -(soilPos.y * heightHalf) + heightHalf - 100); // Offset for now
+          updateTooltipPos('Light_Lvl', (soilPos.x * widthHalf) + widthHalf + 200, -(soilPos.y * heightHalf) + heightHalf - 100);
+        } else if (activeQuestId === 2) {
+          // Quest 3 Tooltips (Retro)
+          const screenPos = new THREE.Vector3(0, 0.026, -0.05).project(cameraRef.current);
+          updateTooltipPos('LCD_Info', (screenPos.x * widthHalf) + widthHalf - 100, -(screenPos.y * heightHalf) + heightHalf - 50);
+          updateTooltipPos('Power_Input', (screenPos.x * widthHalf) + widthHalf + 100, -(screenPos.y * heightHalf) + heightHalf + 100);
+        } else if (activeQuestId === 3) {
+          // Quest 4 Tooltips (Kitchen)
+          // Illuminance: Under cabinet
+          const cabinetUnderPos = new THREE.Vector3(0, 1.4, -0.7).project(cameraRef.current);
+          updateTooltipPos('Illuminance', (cabinetUnderPos.x * widthHalf) + widthHalf - 150, -(cabinetUnderPos.y * heightHalf) + heightHalf);
+
+          // Motion Radius: Floor center
+          const floorPos = new THREE.Vector3(0, 0, 1.2).project(cameraRef.current);
+          updateTooltipPos('Motion_Radius', (floorPos.x * widthHalf) + widthHalf + 100, -(floorPos.y * heightHalf) + heightHalf);
         }
       }
       renderer.render(scene, camera);
@@ -522,28 +643,45 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
             duration: 0.5,
             delay: 1.2
           });
-        }
+        });
+}
+      } else if (activeQuestId === 3) {
+  // Quest 4 Success: Turn on Lights
+  const lights = sceneRef.current?.getObjectByName('cabinet_lights');
+  if (lights) {
+    lights.children.forEach(child => {
+      if (child instanceof THREE.SpotLight) {
+        gsap.to(child, { intensity: 10, duration: 1.5, ease: "power2.out" });
       }
+    });
+  }
+  // Pulse the ring
+  const ring = sceneRef.current?.getObjectByName('motion_ring');
+  if (ring) {
+    gsap.to((ring as THREE.Mesh).material, { opacity: 0.8, duration: 0.5, yoyo: true, repeat: 3 });
+  }
+  if (questMarkRef.current) questMarkRef.current.visible = false;
+}
 
     } else if (gameState === GameState.DASHBOARD && splitterRef.current && questMarkRef.current) {
-      splitterRef.current.visible = false;
-      questMarkRef.current.visible = true;
-    }
+  splitterRef.current.visible = false;
+  questMarkRef.current.visible = true;
+}
   }, [gameState, activeQuestId]);
 
-  useEffect(() => {
-    if (gameState === GameState.ZOOMING && cameraRef.current) {
-      gsap.to(cameraRef.current.position, {
-        x: -0.3, y: 0.9, z: 0.2,
-        duration: 0.8,
-        ease: "power2.inOut"
-      });
-    } else if (gameState === GameState.DASHBOARD && cameraRef.current) {
-      gsap.to(cameraRef.current.position, { x: 0, y: 1.2, z: 0.8, duration: 1 });
-    }
-  }, [gameState]);
+useEffect(() => {
+  if (gameState === GameState.ZOOMING && cameraRef.current) {
+    gsap.to(cameraRef.current.position, {
+      x: -0.3, y: 0.9, z: 0.2,
+      duration: 0.8,
+      ease: "power2.inOut"
+    });
+  } else if (gameState === GameState.DASHBOARD && cameraRef.current) {
+    gsap.to(cameraRef.current.position, { x: 0, y: 1.2, z: 0.8, duration: 1 });
+  }
+}, [gameState]);
 
-  return <div ref={mountRef} className="absolute inset-0 z-0 bg-[#020205]" />;
+return <div ref={mountRef} className="absolute inset-0 z-0 bg-[#020205]" />;
 };
 
 export default ThreeScene;
