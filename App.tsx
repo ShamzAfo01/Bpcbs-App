@@ -52,6 +52,8 @@ const App: React.FC = () => {
         onQuestHover={setIsHoveringQuest}
         onSplitterHover={setActiveSplitterPart}
         updateTooltipPos={updateTooltipPos}
+        setGameState={setGameState}
+        setQuestStates={setQuestStates}
       />
 
       {/* Interface Manager */}
