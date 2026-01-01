@@ -103,11 +103,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartQuest, questStates }) => {
             onClick={() => onStartQuest(2)}
             className={`relative rounded-3xl p-6 cursor-pointer transition-all hover:scale-105 active:scale-95 overflow-hidden duration-300 shadow-md border-2 border-transparent hover:border-gray-500 group ${questStates[2]?.solved ? 'bg-gray-200' : 'bg-[#1a1a1a]'}`}
           >
-            {/* Playlet: Retro Static Noise */}
+            {/* Playlet: Retro Pong */}
             {!questStates[2]?.solved && (
-              <div className="absolute inset-0 pointer-events-none opacity-30 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif')] bg-cover opacity-10 mix-blend-overlay"></div>
-                <div className="absolute top-[20%] left-[10%] w-[80%] h-[2px] bg-green-500 animate-pulse shadow-[0_0_10px_#0F0]"></div>
+              <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#2A321B]/80 flex flex-col p-4 font-mono text-[#1a2012]">
+                <div className="flex justify-between text-[8px] mb-8 font-bold opacity-50">
+                  <span>P1: 04</span>
+                  <span>HI: 99</span>
+                </div>
+                <div className="relative w-full h-24 border border-[#1a2012]/30 bg-[#2A321B]">
+                  <div className="absolute left-2 top-8 w-1 h-6 bg-[#1a2012] animate-pong-paddle"></div>
+                  <div className="absolute right-2 top-4 w-1 h-6 bg-[#1a2012] animate-pong-paddle-enemy"></div>
+                  <div className="absolute w-2 h-2 bg-[#1a2012] animate-pong-ball"></div>
+                </div>
               </div>
             )}
 
@@ -138,12 +145,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartQuest, questStates }) => {
             onClick={() => onStartQuest(3)}
             className={`relative rounded-3xl p-6 cursor-pointer transition-all hover:scale-105 active:scale-95 overflow-hidden duration-300 shadow-md border-2 border-transparent hover:border-blue-900 group ${questStates[3]?.solved ? 'bg-blue-950' : 'bg-[#000022]'}`}
           >
-            {/* Playlet: Moonlight Flicker */}
+            {/* Playlet: Motion Sensor Cone */}
             {!questStates[3]?.solved && (
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute inset-0 bg-blue-900/20 mix-blend-overlay"></div>
-                {/* Simulating a flickering light source */}
-                <div className="absolute top-0 right-0 w-[150%] h-[150%] bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,200,0.1),transparent_70%)] animate-pulse opacity-50 translate-x-10 -translate-y-10"></div>
+              <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
+                <div className="relative w-full h-full">
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-gray-700 rounded-full shadow-lg"></div>
+                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[40px] border-l-transparent border-r-[40px] border-r-transparent border-b-[80px] border-b-blue-500/20 rounded-t-full animate-sensor-scan origin-bottom"></div>
+                  <div className="absolute bottom-10 w-4 h-4 bg-red-500 rounded-full animate-intruder-move opacity-0"></div>
+                </div>
               </div>
             )}
 
@@ -182,8 +191,40 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartQuest, questStates }) => {
           <span className="text-white font-black text-[22px] font-['Google Sans Flex']">Start</span>
         </button>
       </div>
+      <style>{`
+        @keyframes battery-charge { 0% { height: 0%; } 100% { height: 100%; } }
+        .animate-battery-charge { animation: battery-charge 2s linear infinite; }
+        
+        @keyframes sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+        .animate-sway { animation: sway 3s ease-in-out infinite; }
+        
+        @keyframes scale-x { 0%, 100% { transform: scaleX(0.8); } 50% { transform: scaleX(1.1); } }
+        .animate-scale-x { animation: scale-x 3s ease-in-out infinite; }
+        
+        @keyframes pong-ball { 
+           0% { left: 10%; top: 30%; } 
+           25% { left: 50%; top: 10%; }
+           50% { left: 90%; top: 60%; }
+           75% { left: 50%; top: 90%; }
+           100% { left: 10%; top: 30%; }
+        }
+        .animate-pong-ball { animation: pong-ball 2s linear infinite; }
+        
+        @keyframes pong-paddle { 0%, 100% { top: 20%; } 50% { top: 60%; } }
+        .animate-pong-paddle { animation: pong-paddle 2s ease-in-out infinite alternate; }
+
+        @keyframes pong-paddle-enemy { 0%, 100% { top: 50%; } 50% { top: 10%; } }
+        .animate-pong-paddle-enemy { animation: pong-paddle-enemy 2.5s ease-in-out infinite alternate; }
+        
+        @keyframes sensor-scan { 0%, 100% { transform: rotate(-20deg); opacity: 0.1; } 50% { transform: rotate(20deg); opacity: 0.3; } }
+        .animate-sensor-scan { animation: sensor-scan 4s ease-in-out infinite; }
+        
+        @keyframes intruder-move { 0% { left: -10%; } 100% { left: 110%; } }
+        .animate-intruder-move { animation: intruder-move 4s linear infinite; }
+      `}</style>
     </div>
   );
 };
 
 export default Dashboard;
+
