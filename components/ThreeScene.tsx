@@ -643,45 +643,44 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ gameState, activeQuestId, onQue
             duration: 0.5,
             delay: 1.2
           });
-        });
-}
+        }
       } else if (activeQuestId === 3) {
-  // Quest 4 Success: Turn on Lights
-  const lights = sceneRef.current?.getObjectByName('cabinet_lights');
-  if (lights) {
-    lights.children.forEach(child => {
-      if (child instanceof THREE.SpotLight) {
-        gsap.to(child, { intensity: 10, duration: 1.5, ease: "power2.out" });
+        // Quest 4 Success: Turn on Lights
+        const lights = sceneRef.current?.getObjectByName('cabinet_lights');
+        if (lights) {
+          lights.children.forEach(child => {
+            if (child instanceof THREE.SpotLight) {
+              gsap.to(child, { intensity: 10, duration: 1.5, ease: "power2.out" });
+            }
+          });
+        }
+        // Pulse the ring
+        const ring = sceneRef.current?.getObjectByName('motion_ring');
+        if (ring) {
+          gsap.to((ring as THREE.Mesh).material, { opacity: 0.8, duration: 0.5, yoyo: true, repeat: 3 });
+        }
+        if (questMarkRef.current) questMarkRef.current.visible = false;
       }
-    });
-  }
-  // Pulse the ring
-  const ring = sceneRef.current?.getObjectByName('motion_ring');
-  if (ring) {
-    gsap.to((ring as THREE.Mesh).material, { opacity: 0.8, duration: 0.5, yoyo: true, repeat: 3 });
-  }
-  if (questMarkRef.current) questMarkRef.current.visible = false;
-}
 
     } else if (gameState === GameState.DASHBOARD && splitterRef.current && questMarkRef.current) {
-  splitterRef.current.visible = false;
-  questMarkRef.current.visible = true;
-}
+      splitterRef.current.visible = false;
+      questMarkRef.current.visible = true;
+    }
   }, [gameState, activeQuestId]);
 
-useEffect(() => {
-  if (gameState === GameState.ZOOMING && cameraRef.current) {
-    gsap.to(cameraRef.current.position, {
-      x: -0.3, y: 0.9, z: 0.2,
-      duration: 0.8,
-      ease: "power2.inOut"
-    });
-  } else if (gameState === GameState.DASHBOARD && cameraRef.current) {
-    gsap.to(cameraRef.current.position, { x: 0, y: 1.2, z: 0.8, duration: 1 });
-  }
-}, [gameState]);
+  useEffect(() => {
+    if (gameState === GameState.ZOOMING && cameraRef.current) {
+      gsap.to(cameraRef.current.position, {
+        x: -0.3, y: 0.9, z: 0.2,
+        duration: 0.8,
+        ease: "power2.inOut"
+      });
+    } else if (gameState === GameState.DASHBOARD && cameraRef.current) {
+      gsap.to(cameraRef.current.position, { x: 0, y: 1.2, z: 0.8, duration: 1 });
+    }
+  }, [gameState]);
 
-return <div ref={mountRef} className="absolute inset-0 z-0 bg-[#020205]" />;
+  return <div ref={mountRef} className="absolute inset-0 z-0 bg-[#020205]" />;
 };
 
 export default ThreeScene;
