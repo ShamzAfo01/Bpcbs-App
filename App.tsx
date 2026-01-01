@@ -25,6 +25,14 @@ const App: React.FC = () => {
   });
   const audioCtxRef = useRef<AudioContext | null>(null);
 
+  // Proposed Solution Data
+  const solutions = [
+    { name: "Splitter Node V2", desc: "Pass-through power distribution.", efficiency: "98%", input: "USB-C PD" },
+    { name: "Moisture Alarm V3", desc: "Capacitive soil monitoring.", efficiency: "100%", input: "3.3V GPIO" },
+    { name: "Flex LED Strip", desc: "Edge-lit backlight retrofit.", efficiency: "95%", input: "5V Boost" },
+    { name: "PIR Controller", desc: "Motion-activated dimmer.", efficiency: "99%", input: "12V Rail" }
+  ];
+
   const updateTooltipPos = (id: string, x: number, y: number) => {
     setTooltipPositions(prev => ({ ...prev, [id]: { x, y } }));
   };
@@ -97,13 +105,50 @@ const App: React.FC = () => {
 
               {/* Terminal Logs */}
               <div className="flex-1 font-mono text-xs text-stone-300 space-y-3 leading-relaxed">
-                <TypewriterLog activeQuestId={activeQuestId} onComplete={() => setGameState(GameState.REVEALING)} />
+                <TypewriterLog activeQuestId={activeQuestId} onComplete={() => setGameState(GameState.READY_TO_DEPLOY)} />
               </div>
 
               {/* Progress Bar */}
               <div className="h-1 w-full bg-stone-800 rounded-full mt-4 overflow-hidden">
                 <div className="h-full bg-cyan-500 animate-progres-fill"></div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* State: Ready to Deploy (Manual Confirmation) */}
+        {gameState === GameState.READY_TO_DEPLOY && (
+          <div className="pointer-events-auto absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-md z-50 animate-in zoom-in-95 duration-300">
+            <div className="relative w-[400px] bg-stone-900 border border-cyan-500/50 rounded-2xl p-6 shadow-[0_0_50px_rgba(34,211,238,0.15)] flex flex-col gap-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="text-cyan-400 font-black tracking-widest uppercase text-sm">Solution Proposed</div>
+                <div className="text-green-500 text-[10px] font-mono border border-green-500/50 px-2 py-0.5 rounded">READY</div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-stone-400 text-[10px] uppercase tracking-wider">Hardware Component</div>
+                <div className="text-white text-2xl font-black">{solutions[activeQuestId].name}</div>
+                <p className="text-stone-300 text-xs leading-relaxed">{solutions[activeQuestId].desc}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="bg-black/40 p-3 rounded-lg border border-white/5">
+                  <div className="text-stone-500 text-[8px] uppercase">Efficiency</div>
+                  <div className="text-green-400 font-mono text-sm">{solutions[activeQuestId].efficiency}</div>
+                </div>
+                <div className="bg-black/40 p-3 rounded-lg border border-white/5">
+                  <div className="text-stone-500 text-[8px] uppercase">Input Type</div>
+                  <div className="text-cyan-400 font-mono text-sm">{solutions[activeQuestId].input}</div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setGameState(GameState.REVEALING)}
+                className="mt-4 w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black uppercase tracking-[0.2em] py-4 rounded-xl transition-all hover:scale-[1.02] shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 group"
+              >
+                <span>Deploy Fix</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </button>
             </div>
           </div>
         )}
@@ -275,7 +320,7 @@ const App: React.FC = () => {
         .animate-shimmer { animation: shimmer 2s infinite; }
         
         @keyframes progress-fill { 0% { width: 0%; } 100% { width: 100%; } }
-        .animate-progres-fill { animation: progress-fill 3s linear forwards; }
+        .animate-progres-fill { animation: progress-fill 2s linear forwards; }
       `}</style>
     </div>
   );
@@ -320,9 +365,9 @@ const TypewriterLog: React.FC<{ activeQuestId: number, onComplete: () => void }>
         lineIndex++;
       } else {
         clearInterval(interval);
-        setTimeout(onComplete, 500);
+        setTimeout(onComplete, 200); // 200ms delay after last line
       }
-    }, 800); // Add a line every 800ms
+    }, 400); // 4 lines * 400ms = ~1.6s
 
     return () => clearInterval(interval);
   }, [activeQuestId, onComplete]);
