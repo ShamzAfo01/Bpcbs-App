@@ -6,10 +6,15 @@ import LabView from './components/LabView';
 import DePINView from './components/DePINView';
 import MarketView from './components/MarketView';
 import SuccessModal from './components/SuccessModal';
+import { Backend } from './services/mockBackend';
+import { NetworkId, UserProfile } from './types/web3';
 
 const App: React.FC = () => {
   // === Global State ===
   const [gameState, setGameState] = useState<GameState>(GameState.DASHBOARD);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
   const [activeQuestId, setActiveQuestId] = useState<number>(0);
   const [questStates, setQuestStates] = useState<{ solved: boolean }[]>([
     { solved: false }, // Quest 0: Juice Box (Splitter)
@@ -35,6 +40,22 @@ const App: React.FC = () => {
 
   // Audio Context (Reserved)
   const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // === Web3 Logic: Auth & Identity ===
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        // Simulating Wallet Connect
+        const { user } = await Backend.login("0x71C...9A", NetworkId.POLYGON);
+        setUserProfile(user);
+        console.log("Web3 Auth Success:", user);
+      } catch (e) {
+        console.error("Auth Failed:", e);
+        // In a real app, show "Switch Network" modal here
+      }
+    };
+    initAuth();
+  }, []);
 
   // Proposed Solution Data (for Solve Flow)
   const solutions = [
@@ -123,7 +144,17 @@ const App: React.FC = () => {
           {/* For now, just a "Solve" button overlay if in Observe Mode */}
           <div className="absolute bottom-10 left-0 w-full flex justify-center pointer-events-auto">
             <button
-              onClick={() => setGameState(GameState.BUILDING)}
+              onClick={async () => {
+                try {
+                  if (userProfile) {
+                    const session = await Backend.startSession(userProfile.walletAddress, activeQuestId);
+                    setCurrentSessionId(session.id);
+                    setGameState(GameState.BUILDING);
+                  }
+                } catch (e) {
+                  alert("Session Start Failed: " + e);
+                }
+              }}
               className="bg-[#0038DF] text-white font-black text-xl py-4 px-12 rounded-full uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all animate-pulse"
             >
               Tap Here to Solve
@@ -151,7 +182,23 @@ const App: React.FC = () => {
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-6 animate-in zoom-in-95">
           <SolutionCard
             solution={solutions[activeQuestId]}
-            onDeploy={() => setGameState(GameState.REVEALING)}
+            onDeploy={async () => {
+              if (currentSessionId) {
+                // Submit Score Logic
+                try {
+                  await Backend.submitScore({
+                    sessionId: currentSessionId,
+                    score: 100,
+                    clientTimestamp: Date.now(),
+                    signature: "mock_sig_123"
+                  });
+                  console.log("Score Submitted to Ledger");
+                } catch (e) {
+                  console.error("Score Verification Failed:", e);
+                }
+              }
+              setGameState(GameState.REVEALING);
+            }}
           />
         </div>
       )}
@@ -248,7 +295,9 @@ const SolutionCard: React.FC<{ solution: any, onDeploy: () => void }> = ({ solut
         <div className="text-cyan-400 font-mono text-sm">{solution.input}</div>
       </div>
     </div>
-    <button onClick={onDeploy} className="mt-4 w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black uppercase tracking-[0.2em] py-4 rounded-xl transition-all hover:scale-[1.02] flex items-center justify-center gap-2 group">
+    <button
+      onClick={onDeploy}
+      className="mt-4 w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black uppercase tracking-[0.2em] py-4 rounded-xl transition-all hover:scale-[1.02] flex items-center justify-center gap-2 group">
       <span>Deploy Fix</span>
       <span className="group-hover:translate-x-1 transition-transform">→</span>
     </button>
