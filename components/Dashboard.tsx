@@ -19,178 +19,165 @@ const LogoSVG = () => (
 
 const Dashboard: React.FC<DashboardProps> = ({ onStartQuest, questStates }) => {
   return (
-    <div className="relative w-[402px] h-[874px] bg-white rounded-[40px] shadow-2xl overflow-hidden pointer-events-auto border-[8px] border-black scale-90 md:scale-100">
-      {/* Header */}
-      <div className="absolute left-[149px] top-[47px] flex items-center gap-[5.25px]">
-        <LogoSVG />
-        <span className="text-[#444444] font-medium text-[18px] leading-[23px] tracking-[-0.04em] font-['DM Sans']">
-          buildPCBs
-        </span>
+
+    <div className="relative w-full h-full bg-[#e0e5ec] overflow-y-auto pb-24 px-4 pt-4">
+      {/* Header & Title - Hidden/Embedded in QuestsView shell or simplified here */}
+      {/* We rely on QuestsView for the main header, but if we keep it generic: */}
+      <div className="mb-6">
+        <h2 className="text-slate-500 font-bold text-xs uppercase tracking-widest mb-1">Current Operations</h2>
+        <h1 className="text-slate-700 font-black text-3xl tracking-tight">Active Scenarios</h1>
       </div>
 
-      {/* Title */}
-      <div className="absolute left-[16px] top-[123px] w-[356px] text-[#888888] font-extrabold text-[22px] leading-[120%] tracking-[0.01em]">
-        Solve one of the scenes to earn.
-      </div>
-
-      {/* Grid */}
-      <div className="absolute inset-0 pt-[179px] px-[16px]">
-        <div className="grid grid-cols-2 gap-[10px]">
-          {/* Tile 1: Juice Box */}
-          <div
-            onClick={() => onStartQuest(0)}
-            className={`relative rounded-3xl p-6 cursor-pointer transition-all hover:scale-105 active:scale-95 overflow-hidden duration-300 shadow-md border-2 border-transparent hover:border-blue-300 group ${questStates[0].solved ? 'bg-blue-50' : 'bg-[#F0F4F8]'}`}
-          >
-            {/* Playlet: Subtle tech pulse */}
-            <div className="absolute inset-0 pointer-events-none opacity-10">
-              <div className="absolute inset-0 bg-blue-400 animate-pulse"></div>
-            </div>
-
-            {questStates[0].solved ? (
-              <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                <div className="text-4xl mb-2">⚡</div>
-                <div className="text-[10px] font-black text-[#0038DF] uppercase tracking-tighter">Juice Box Solved</div>
-                <div className="mt-2 text-[8px] text-stone-500 font-mono">Status: Charging</div>
-              </div>
-            ) : (
-              <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                <div className="text-4xl mb-2 transition-transform duration-700 group-hover:scale-110">☕</div>
-                <div className="text-[10px] font-bold text-stone-600 uppercase tracking-widest">Cafe Chronicles</div>
-                <div className="mt-2 text-[8px] text-stone-400">Preview: Power Management</div>
-              </div>
-            )}
-            <div className="absolute bottom-2 left-2 flex gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
-            </div>
+      {/* Quest Feed (Vertical List) */}
+      <div className="flex flex-col gap-6">
+        {/* Tile 1: Juice Box */}
+        {/* Tile 1: Juice Box */}
+        <div
+          onClick={() => onStartQuest(0)}
+          className={`relative w-full h-64 rounded-3xl p-6 cursor-pointer transition-all active:scale-95 overflow-hidden shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] border-2 border-transparent group ${questStates[0].solved ? 'bg-blue-50' : 'bg-[#e0e5ec]'}`}
+        >
+          {/* Playlet: Subtle tech pulse */}
+          <div className="absolute inset-0 pointer-events-none opacity-10">
+            <div className="absolute inset-0 bg-blue-400 animate-pulse"></div>
           </div>
 
-          {/* Tile 2: The Thirsty Monstera */}
-          <div
-            onClick={() => onStartQuest(1)}
-            className={`relative rounded-3xl p-6 cursor-pointer transition-all hover:scale-105 active:scale-95 overflow-hidden duration-300 shadow-md border-2 border-transparent hover:border-green-300 group ${questStates[1].solved ? 'bg-green-50' : 'bg-[#FDFBE6]'}`}
-          >
-            {/* Playlet Background Animation for Tile 2 */}
-            {!questStates[1].solved && (
-              <div className="absolute inset-0 pointer-events-none opacity-20">
-                {/* Simulating a plant swaying or rising */}
-                <div className="absolute bottom-[-20%] left-[20%] w-[60%] h-[80%] bg-green-900 rounded-t-full animate-pulse blur-xl"></div>
-                <div className="absolute top-[30%] left-[30%] text-[80px] animate-bounce duration-[3000ms] opacity-50">🍂</div>
-              </div>
-            )}
-
-            {questStates[1].solved ? (
-              <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                <div className="text-4xl mb-2">🌿</div>
-                <div className="text-[10px] font-black text-green-600 uppercase tracking-tighter">Monstera Saved</div>
-                <div className="mt-2 text-[8px] text-stone-500 font-mono">Status: Thriving</div>
-              </div>
-            ) : (
-              <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                <div className="text-4xl mb-2 transition-transform duration-1000 group-hover:rotate-12">🍂</div>
-                <div className="text-[10px] font-bold text-stone-600 uppercase tracking-widest">The Thirsty Monstera</div>
-                <div className="mt-2 text-[8px] text-stone-400">Preview: Biological Asset Recovery</div>
-              </div>
-            )}
-            <div className="absolute bottom-2 left-2 flex gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+          {questStates[0].solved ? (
+            <div className="relative z-10 flex flex-col items-center justify-center h-full">
+              <div className="text-4xl mb-2">⚡</div>
+              <div className="text-[10px] font-black text-[#0038DF] uppercase tracking-tighter">Juice Box Solved</div>
+              <div className="mt-2 text-[8px] text-stone-500 font-mono">Status: Charging</div>
             </div>
+          ) : (
+            <div className="relative z-10 flex flex-col items-center justify-center h-full">
+              <div className="text-4xl mb-2 transition-transform duration-700 group-hover:scale-110">☕</div>
+              <div className="text-[10px] font-bold text-stone-600 uppercase tracking-widest">Cafe Chronicles</div>
+              <div className="mt-2 text-[8px] text-stone-400">Preview: Power Management</div>
+            </div>
+          )}
+          <div className="absolute bottom-2 left-2 flex gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
           </div>
+        </div>
 
-          {/* Tile 3: The Retro Revival (Unlocked) */}
-          <div
-            onClick={() => onStartQuest(2)}
-            className={`relative rounded-3xl p-6 cursor-pointer transition-all hover:scale-105 active:scale-95 overflow-hidden duration-300 shadow-md border-2 border-transparent hover:border-gray-500 group ${questStates[2]?.solved ? 'bg-gray-200' : 'bg-[#1a1a1a]'}`}
-          >
-            {/* Playlet: Retro Pong */}
-            {!questStates[2]?.solved && (
-              <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#2A321B]/80 flex flex-col p-4 font-mono text-[#1a2012]">
-                <div className="flex justify-between text-[8px] mb-8 font-bold opacity-50">
-                  <span>P1: 04</span>
-                  <span>HI: 99</span>
-                </div>
-                <div className="relative w-full h-24 border border-[#1a2012]/30 bg-[#2A321B]">
-                  <div className="absolute left-2 top-8 w-1 h-6 bg-[#1a2012] animate-pong-paddle"></div>
-                  <div className="absolute right-2 top-4 w-1 h-6 bg-[#1a2012] animate-pong-paddle-enemy"></div>
-                  <div className="absolute w-2 h-2 bg-[#1a2012] animate-pong-ball"></div>
-                </div>
-              </div>
-            )}
-
-            {questStates[2]?.solved ? (
-              <div className="relative z-10 flex flex-col items-center justify-center h-full text-gray-800">
-                <div className="text-4xl mb-2">💾</div>
-                <div className="text-[10px] font-black uppercase tracking-tighter">System Restored</div>
-                <div className="mt-2 text-[8px] font-mono">Status: Online</div>
-              </div>
-            ) : (
-              <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                <div className="text-4xl mb-2 transition-transform duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0">👾</div>
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Retro Revival</div>
-                <div className="mt-2 text-[8px] text-green-500 font-mono animate-pulse">Preview: Display Repair</div>
-              </div>
-            )}
-
-            {/* Status Dots */}
-            <div className="absolute bottom-2 left-2 flex gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-500"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+        {/* Tile 2: The Thirsty Monstera */}
+        <div
+          onClick={() => onStartQuest(1)}
+          className={`relative w-full h-64 rounded-3xl p-6 cursor-pointer transition-all active:scale-95 overflow-hidden shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] border-2 border-transparent group ${questStates[1].solved ? 'bg-green-50' : 'bg-[#e0e5ec]'}`}
+        >
+          {/* Playlet Background Animation for Tile 2 */}
+          {!questStates[1].solved && (
+            <div className="absolute inset-0 pointer-events-none opacity-20">
+              {/* Simulating a plant swaying or rising */}
+              <div className="absolute bottom-[-20%] left-[20%] w-[60%] h-[80%] bg-green-900 rounded-t-full animate-pulse blur-xl"></div>
+              <div className="absolute top-[30%] left-[30%] text-[80px] animate-bounce duration-[3000ms] opacity-50">🍂</div>
             </div>
+          )}
+
+          {questStates[1].solved ? (
+            <div className="relative z-10 flex flex-col items-center justify-center h-full">
+              <div className="text-4xl mb-2">🌿</div>
+              <div className="text-[10px] font-black text-green-600 uppercase tracking-tighter">Monstera Saved</div>
+              <div className="mt-2 text-[8px] text-stone-500 font-mono">Status: Thriving</div>
+            </div>
+          ) : (
+            <div className="relative z-10 flex flex-col items-center justify-center h-full">
+              <div className="text-4xl mb-2 transition-transform duration-1000 group-hover:rotate-12">🍂</div>
+              <div className="text-[10px] font-bold text-stone-600 uppercase tracking-widest">The Thirsty Monstera</div>
+              <div className="mt-2 text-[8px] text-stone-400">Preview: Biological Asset Recovery</div>
+            </div>
+          )}
+          <div className="absolute bottom-2 left-2 flex gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
           </div>
+        </div>
 
-          {/* Tile 4: The Midnight Snack (Unlocked) */}
-          <div
-            onClick={() => onStartQuest(3)}
-            className={`relative rounded-3xl p-6 cursor-pointer transition-all hover:scale-105 active:scale-95 overflow-hidden duration-300 shadow-md border-2 border-transparent hover:border-blue-900 group ${questStates[3]?.solved ? 'bg-blue-950' : 'bg-[#000022]'}`}
-          >
-            {/* Playlet: Motion Sensor Cone */}
-            {!questStates[3]?.solved && (
-              <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
-                <div className="relative w-full h-full">
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-gray-700 rounded-full shadow-lg"></div>
-                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[40px] border-l-transparent border-r-[40px] border-r-transparent border-b-[80px] border-b-blue-500/20 rounded-t-full animate-sensor-scan origin-bottom"></div>
-                  <div className="absolute bottom-10 w-4 h-4 bg-red-500 rounded-full animate-intruder-move opacity-0"></div>
-                </div>
+        {/* Tile 3: The Retro Revival */}
+        <div
+          onClick={() => onStartQuest(2)}
+          className={`relative w-full h-64 rounded-3xl p-6 cursor-pointer transition-all active:scale-95 overflow-hidden shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] border-2 border-transparent group ${questStates[2]?.solved ? 'bg-gray-200' : 'bg-[#1a1a1a]'}`}
+        >
+          {/* Playlet: Retro Pong */}
+          {!questStates[2]?.solved && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#2A321B]/80 flex flex-col p-4 font-mono text-[#1a2012]">
+              <div className="flex justify-between text-[8px] mb-8 font-bold opacity-50">
+                <span>P1: 04</span>
+                <span>HI: 99</span>
               </div>
-            )}
-
-            {questStates[3]?.solved ? (
-              <div className="relative z-10 flex flex-col items-center justify-center h-full text-blue-100">
-                <div className="text-4xl mb-2">💡</div>
-                <div className="text-[10px] font-black uppercase tracking-tighter text-yellow-200">Motion Detected</div>
-                <div className="mt-2 text-[8px] font-mono text-blue-300">Zone: Active</div>
+              <div className="relative w-full h-24 border border-[#1a2012]/30 bg-[#2A321B]">
+                <div className="absolute left-2 top-8 w-1 h-6 bg-[#1a2012] animate-pong-paddle"></div>
+                <div className="absolute right-2 top-4 w-1 h-6 bg-[#1a2012] animate-pong-paddle-enemy"></div>
+                <div className="absolute w-2 h-2 bg-[#1a2012] animate-pong-ball"></div>
               </div>
-            ) : (
-              <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                <div className="text-4xl mb-2 transition-transform duration-1000 group-hover:translate-y-[-5px]">🌙</div>
-                <div className="text-[10px] font-bold text-blue-200 uppercase tracking-widest text-center">The Midnight Snack</div>
-                <div className="mt-2 text-[8px] text-yellow-100 font-mono opacity-60">Preview: Sensor Logic</div>
-              </div>
-            )}
-
-            {/* Status Dots */}
-            <div className="absolute bottom-2 left-2 flex gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-900"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
             </div>
+          )}
+
+          {questStates[2]?.solved ? (
+            <div className="relative z-10 flex flex-col items-center justify-center h-full text-gray-800">
+              <div className="text-4xl mb-2">💾</div>
+              <div className="text-[10px] font-black uppercase tracking-tighter">System Restored</div>
+              <div className="mt-2 text-[8px] font-mono">Status: Online</div>
+            </div>
+          ) : (
+            <div className="relative z-10 flex flex-col items-center justify-center h-full">
+              <div className="text-4xl mb-2 transition-transform duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0">👾</div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Retro Revival</div>
+              <div className="mt-2 text-[8px] text-green-500 font-mono animate-pulse">Preview: Display Repair</div>
+            </div>
+          )}
+
+          {/* Status Dots */}
+          <div className="absolute bottom-2 left-2 flex gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-gray-500"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
+          </div>
+        </div>
+
+        {/* Tile 4: The Midnight Snack */}
+        <div
+          onClick={() => onStartQuest(3)}
+          className={`relative w-full h-64 rounded-3xl p-6 cursor-pointer transition-all active:scale-95 overflow-hidden shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] border-2 border-transparent group ${questStates[3]?.solved ? 'bg-blue-950' : 'bg-[#000022]'}`}
+        >
+          {/* Playlet: Motion Sensor Cone */}
+          {!questStates[3]?.solved && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
+              <div className="relative w-full h-full">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-gray-700 rounded-full shadow-lg"></div>
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[40px] border-l-transparent border-r-[40px] border-r-transparent border-b-[80px] border-b-blue-500/20 rounded-t-full animate-sensor-scan origin-bottom"></div>
+                <div className="absolute bottom-10 w-4 h-4 bg-red-500 rounded-full animate-intruder-move opacity-0"></div>
+              </div>
+            </div>
+          )}
+
+          {questStates[3]?.solved ? (
+            <div className="relative z-10 flex flex-col items-center justify-center h-full text-blue-100">
+              <div className="text-4xl mb-2">💡</div>
+              <div className="text-[10px] font-black uppercase tracking-tighter text-yellow-200">Motion Detected</div>
+              <div className="mt-2 text-[8px] font-mono text-blue-300">Zone: Active</div>
+            </div>
+          ) : (
+            <div className="relative z-10 flex flex-col items-center justify-center h-full">
+              <div className="text-4xl mb-2 transition-transform duration-1000 group-hover:translate-y-[-5px]">🌙</div>
+              <div className="text-[10px] font-bold text-blue-200 uppercase tracking-widest text-center">The Midnight Snack</div>
+              <div className="mt-2 text-[8px] text-yellow-100 font-mono opacity-60">Preview: Sensor Logic</div>
+            </div>
+          )}
+
+          {/* Status Dots */}
+          <div className="absolute bottom-2 left-2 flex gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-900"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
           </div>
         </div>
       </div>
 
-      {/* Start Button Group */}
-      <div className="absolute left-[64px] top-[762px] w-[274px] h-[75px]">
-        <div className="absolute w-[274px] h-[75px] bg-[#0038DF] border border-black rounded-[99px]"></div>
-        <button
-          onClick={() => onStartQuest(0)}
-          className="absolute w-[274px] h-[65px] border border-black rounded-[99px] flex items-center justify-center active:scale-95 transition-transform"
-          style={{ background: 'linear-gradient(180deg, #0038DF 20.77%, #6C90FF 112.31%)' }}
-        >
-          <span className="text-white font-black text-[22px] font-['Google Sans Flex']">Start</span>
-        </button>
-      </div>
+      {/* spacer to prevent nav overlap */}
+      <div className="h-20"></div>
+
+      {/* Start Button Group (Removed as Cards are clickable) */}
       <style>{`
         @keyframes battery-charge { 0% { height: 0%; } 100% { height: 100%; } }
         .animate-battery-charge { animation: battery-charge 2s linear infinite; }
