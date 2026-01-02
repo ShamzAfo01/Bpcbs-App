@@ -1,4 +1,4 @@
- Wikipedia Wikipediaimport { UserProfile, NetworkId, SecurityLevel, GameSession, ScoreSubmission, ClaimRequest, TransactionStatus } from '../types/web3';
+import { UserProfile, NetworkId, SecurityLevel, GameSession, ScoreSubmission, ClaimRequest, TransactionStatus } from '../types/web3';
 
 // Mock Backend Service
 // In production, this would be a Node.js/Python API
